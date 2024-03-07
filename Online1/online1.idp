@@ -1,0 +1,33 @@
+vocabulary {
+  type country := {Albania, Austria, Belarus, Belgium, Bosnia_and_Herzegovina, Bulgaria, Croatia, Czechia, Denmark, Estonia, Finland, France, Germany, Greece, Hungary, Iceland, Ireland, Italy, Kosovo, Latvia, Lithuania, Luxembourg, Netherlands, Norway, Macedonia, Montenegro, Moldova, Poland, Portugal, Romania, Russia, Serbia, Slovakia, Slovenia, Spain, Sweden, Switzerland, Ukraine, UK}
+  
+  type color := {Red, Blue, Green, Yellow}
+  type solution := {0..3}
+
+
+  Bordering : (country * country) -> Bool
+  ColourOf : (solution * country) → color
+
+  distance: solution * solution -> Int
+  k: () -> Int
+  
+}
+
+structure {
+  Bordering := {(Albania, Greece), (Albania, Macedonia), (Albania, Montenegro), (Albania, Kosovo), (Austria, Slovenia), (Austria, Italy), (Austria, Switzerland), (Austria, Germany), (Austria, Czechia), (Austria, Slovakia), (Austria, Hungary), (Belarus, Ukraine), (Belarus, Poland), (Belarus, Lithuania), (Belarus, Latvia), (Belarus, Russia), (Belgium, Netherlands), (Belgium, Germany), (Belgium, Luxembourg), (Belgium, France), (Bosnia_and_Herzegovina, Croatia), (Bosnia_and_Herzegovina, Serbia), (Bosnia_and_Herzegovina, Montenegro), (Bulgaria, Romania), (Bulgaria, Greece), (Bulgaria, Macedonia), (Bulgaria, Serbia), (Croatia, Slovenia), (Croatia, Hungary), (Croatia, Serbia), (Croatia, Bosnia_and_Herzegovina), (Czechia, Poland), (Czechia, Slovakia), (Czechia, Austria), (Czechia, Germany), (Denmark, Germany), (Estonia, Russia), (Estonia, Latvia), (Finland, Norway), (Finland, Sweden), (Finland, Russia), (France, Belgium), (France, Luxembourg), (France, Germany), (France, Switzerland), (France, Italy), (France, Spain), (Germany, Denmark), (Germany, Poland), (Germany, Czechia), (Germany, Austria), (Germany, Switzerland), (Germany, France), (Germany, Luxembourg), (Germany, Belgium), (Germany, Netherlands), (Greece, Albania), (Greece, Macedonia), (Greece, Bulgaria), (Hungary, Slovakia), (Hungary, Ukraine), (Hungary, Romania), (Hungary, Serbia), (Hungary, Croatia), (Hungary, Slovenia), (Hungary, Austria), (Ireland, UK), (Italy, France), (Italy, Switzerland), (Italy, Austria), (Italy, Slovenia), (Kosovo, Serbia), (Kosovo, Macedonia), (Kosovo, Albania), (Kosovo, Montenegro), (Latvia, Estonia), (Latvia, Russia), (Latvia, Belarus), (Latvia, Lithuania), (Lithuania, Latvia), (Lithuania, Belarus), (Lithuania, Poland), (Lithuania, Russia), (Luxembourg, Belgium), (Luxembourg, Germany), (Luxembourg, France), (Netherlands, Germany), (Netherlands, Belgium), (Norway, Sweden), (Norway, Finland), (Macedonia, Kosovo), (Macedonia, Serbia), (Macedonia, Bulgaria), (Macedonia, Greece), (Macedonia, Albania), (Montenegro, Croatia), (Montenegro, Bosnia_and_Herzegovina), (Montenegro, Serbia), (Montenegro, Kosovo), (Montenegro, Albania), (Poland, Russia), (Poland, Lithuania), (Poland, Belarus), (Poland, Ukraine), (Poland, Slovakia), (Poland, Czechia), (Poland, Germany), (Portugal, Spain), (Romania, Ukraine), (Romania, Moldova), (Romania, Bulgaria), (Romania, Serbia), (Romania, Hungary), (Russia, Norway), (Russia, Finland), (Russia, Estonia), (Russia, Latvia), (Russia, Belarus), (Russia, Ukraine), (Serbia, Hungary), (Serbia, Romania), (Serbia, Bulgaria), (Serbia, Macedonia), (Serbia, Kosovo), (Serbia, Montenegro), (Serbia, Bosnia_and_Herzegovina), (Serbia, Croatia), (Slovakia, Poland), (Slovakia, Ukraine), (Slovakia, Hungary), (Slovakia, Austria), (Slovakia, Czechia), (Slovenia, Austria), (Slovenia, Hungary), (Slovenia, Croatia), (Slovenia, Italy), (Spain, Portugal), (Spain, France), (Sweden, Norway), (Sweden, Finland), (Switzerland, Germany), (Switzerland, Austria), (Switzerland, Italy), (Switzerland, France), (Ukraine, Belarus), (Ukraine, Moldova), (Ukraine, Russia), (Ukraine, Hungary), (Ukraine, Slovakia), (Ukraine, Poland), (UK, Ireland)}.
+  //k := 60.
+}
+
+
+theory T:V {
+
+  //!s in solution,c1,c2 in country: Bordering(c1, c2) => ColourOf(s,c1) ~= ColourOf(s,c2).
+  !s1,s2 in solution: distance(s1,s2) = #{c in country: ColourOf(s1,c) ~= ColourOf(s2,c)}.
+  sum{{distance(sx,sy) | sx,sy in solution: sx ~= sy }} > k().
+
+    
+}
+
+procedure main() {
+    pretty_print(model_expand(T, S, timeout_seconds=0, max=50))
+}

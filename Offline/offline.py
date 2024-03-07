@@ -1,8 +1,11 @@
 from idp_engine import IDP
 import contextlib
-import io, re
+import io, re, os
 
-with open('/home/jonas/Documents/MP/IDP/Offline/mapcoloring.idp', 'r') as file:
+BASE = os.path.dirname(os.path.abspath(__file__))
+input ='mapcoloring.idp'
+
+with open(os.path.join(BASE,input), 'r') as file:
 
     code = file.read()
 
