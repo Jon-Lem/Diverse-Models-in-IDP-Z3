@@ -1,0 +1,33 @@
+vocabulary V {
+
+    type Index
+    queen : Index * Index -> Bool
+    n: () -> Int
+    diag: () -> Int
+    diag1: Index * Index -> diag
+    diag2: Index * Index -> diag
+    
+
+}
+
+structure S:V {
+   n := 4.
+   diag := {1..7}
+   Index := {1..4}
+}
+
+theory T:V {
+    #{x,y in n: queen(x,y)} = n.
+    {
+    
+    //!x,y in n: queen(x,y) <- (~?v,w in n: queen(v,w) & v = x & w = y).
+    //!x,y in n: queen(x,y) <- (~?v,w in n: queen(v,w) & v = x-1 & w = y-1).
+    //!x,y in n: queen(x,y) <- (~?v,w in n: queen(v,w) & v = x+1 & w = y-1).
+    //!x,y in n: queen(x,y) <- (~?v,w in n: queen(v,w) & v = x-1 & w = y+1).
+    //!x,y in n: queen(x,y) <- (~?v,w in n: queen(v,w) & v = x+1 & w = y+1).
+    }
+}
+
+procedure main() {
+    pretty_print(model_expand(T, S, timeout_seconds=0, max=20))
+}
