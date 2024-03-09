@@ -11,7 +11,6 @@ vocabulary {
   ColourFrom: Node * country -> color
   edge: Node * Node -> Int
   distance: Node * Node -> Bool
-  
 }
 
 structure {

@@ -50,7 +50,7 @@ for line in output.split('\n'):
         # models[current_model].append((country, color))
 
         models[current_model] += match
-    # print("models:",models)
+    print("models:",models)
 
 
 # Construct output string
@@ -75,7 +75,7 @@ with open('/home/jonas/Documents/MP/IDP/Offline/cluster.idp', 'r') as file:
     lines = file.readlines()
 
 # Insert the new line at the desired position
-position_to_insert = 14 
+position_to_insert = 17
 if not lines[position_to_insert - 1].strip():
     lines.insert(position_to_insert - 1, output)  # Adjust index to 0-based
 
