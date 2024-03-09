@@ -64,17 +64,17 @@ def insertSol(input,sol1,colors,newk):
     # Solutions
     position_to_insert = 4
     oldsol = lines[position_to_insert - 1]
-    lines[position_to_insert - 1] = sol1 + '\n'
+    lines[position_to_insert - 1] = sol1 + "\n"  
 
     # Insert partial solutions
-    position_to_insert = 16 
+    position_to_insert = 14 
     oldcol = lines[position_to_insert - 1]
-    lines[position_to_insert - 1] = colors + '\n'  # Adjust index to 0-based
+    lines[position_to_insert - 1] = colors + "\n"  
 
     # Insert k
-    position_to_insert = 25
+    position_to_insert = 22
     oldk = lines[position_to_insert - 1]
-    lines[position_to_insert - 1] = newk + '\n'
+    lines[position_to_insert - 1] = newk + "\n"  
 
 
     BASE = os.path.dirname(os.path.abspath(__file__))
@@ -85,6 +85,29 @@ def insertSol(input,sol1,colors,newk):
 
     return oldsol,oldcol,oldk
 
+def restoreSol(input,sol1,colors,newk):
+    #Insert solutions
+    BASE = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(BASE,input), 'r') as file:
+        lines = file.readlines()
+
+    # Solutions
+    position_to_insert = 4
+    lines[position_to_insert - 1] = sol1
+
+    # Insert partial solutions
+    position_to_insert = 14 
+    lines[position_to_insert - 1] = colors 
+
+    # Insert k
+    position_to_insert = 22 
+    lines[position_to_insert - 1] = newk 
+
+    BASE = os.path.dirname(os.path.abspath(__file__))
+    input ='online2.idp'
+    # Open the file in write mode and write the modified lines back to the file
+    with open(os.path.join(BASE,input), 'w') as file:
+        file.writelines(lines)
 
 
 def runIDP_(input):
@@ -117,7 +140,7 @@ def main():
 
     oldsol,oldcol,oldk = insertSol(input,solutions,colors,newk)
     runIDP_(input)
-    # oldsol,oldcol,oldk = insertSol(input,oldsol,oldcol,oldk)
+    restoreSol(input,oldsol,oldcol,oldk)
 
 main()
 
