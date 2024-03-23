@@ -16,16 +16,19 @@ def runIDP(input):
         kb.execute()
 
     output = f.getvalue()
+    print(output)
     return output
 
 
-def collect(output):
+def collect(output,predicate):
     # Collect solutions
     matches = []
     solutions = []
     pattern = r'distance :='
     s_pattern = r"(s\d+)"
-    cpattern = r'ColourOf := (.*)'
+    # cpattern = r'ColourOf := (.*)'
+    cpattern = re.escape(predicate) + r' := (.*)'
+
     for line in output.split('\n'):
         
         index = line.find(pattern)
@@ -51,7 +54,9 @@ def collect(output):
 
     # print(matches)  
     colors = 'ColourOf >> '
-    colors+=matches[0]
+    if(len(matches) < 1):
+        return
+    colors+=matches[0] #HIER KAN HET PROGRAMMA CRASHEN
     # print(colors)
     return sol1,colors,solutions
 
@@ -76,6 +81,10 @@ def insertSol(input,sol1,colors,newk,char):
     oldk = lines[position_to_insert - 1]
     lines[position_to_insert - 1] = newk + char   
 
+    if(sol1 and colors and newk == None):
+        position_to_insert = 22
+        oldk = lines[position_to_insert - 1]
+        lines[position_to_insert - 1] = newk + char 
 
     BASE = os.path.dirname(os.path.abspath(__file__))
     input ='online2.idp'
@@ -126,15 +135,22 @@ def runIDP_(input):
 
 def main():
     
-    aantsol = 3
+    n=5
+    k=186
+    # k=200
+
     input ='online2.idp'
+    predicate = "ColourOf"
+    
     char = "\n"
-    k=100
     oldtext = []
-    for i in range(aantsol - 2):
+    for i in range(n - 2):
+        # print("hier")
         output = runIDP(input)
-        solutions,colors,sol=collect(output)
-        dist = len(sol)*k//aantsol
+        if(output == "No models.\n"):
+            break
+        solutions,colors,sol=collect(output,predicate)
+        dist = len(sol)*k//n
         print(f"distance: {dist}")
         newk = f"k() = {dist}."
 
@@ -146,7 +162,11 @@ def main():
             oldtext.append(oldk)
     char = ""
     runIDP_(input)
+    if(len(oldtext) == None):
+        print("Geen modellen gevonden")
+        exit()
     restoreSol(input,oldtext[0],oldtext[1],oldtext[2],char)
 
-main()
+if __name__ == "__main__":
 
+    main()

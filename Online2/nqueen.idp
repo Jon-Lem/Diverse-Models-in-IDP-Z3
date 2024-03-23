@@ -1,10 +1,15 @@
 vocabulary V {
     type Index := {1..5}
-    queen : Index * Index -> Bool
+    type solution := {s1,s2}
+    queen : solution * Index * Index -> Bool
+    distance: solution * solution -> Int
     n: () -> Int
+    k: () -> Int
+
 }
 
 structure S:V {
+   //queen >>  {(s1, 1, 4), (s1, 2, 1), (s1, 3, 3), (s1, 4, 5), (s1, 5, 2)}.
    n := 5.
 }
 
@@ -14,10 +19,6 @@ theory T:V {
     !x,y,u,v in Index: queen(x,y) & queen(u,v) & x~=u & y~=v => (v ~= u - x + y).
     !x,y,u,v in Index: queen(x,y) & queen(u,v) & y~=v => (x ~= u).
     !x,y,u,v in Index: queen(x,y) & queen(u,v) & x~=u => (y ~= v).
-
-    //!x,y in Index: queen(x,y)  => (~?u in Index: queen(u,y) & u ~= x).
-    //!x,y in Index: queen(x,y)  => (~?v in Index: queen(x,v) & v ~= y).
-
     #{x,y in Index: queen(x,y)} = n().
 }
 
