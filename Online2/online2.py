@@ -1,6 +1,14 @@
 from idp_engine import IDP
 import contextlib
 import io, re, os
+import argparse
+
+def indexsearch(lines,target):
+    for index,line in enumerate(lines):
+        if line.strip().startswith(target):
+            return index
+    return -1
+
 
 def runIDP(input):
     print("runIDP")
@@ -26,7 +34,6 @@ def collect(output,predicate):
     solutions = []
     pattern = r'distance :='
     s_pattern = r"(s\d+)"
-    # cpattern = r'ColourOf := (.*)'
     cpattern = re.escape(predicate) + r' := (.*)'
 
     for line in output.split('\n'):
@@ -60,26 +67,26 @@ def collect(output,predicate):
     # print(colors)
     return sol1,colors,solutions
 
-def insertSol(input,sol1,colors,newk,char):
+def insertSol(input,sol1,colors,newk,char,predicate):
     #Insert solutions
     BASE = os.path.dirname(os.path.abspath(__file__))
     with open(os.path.join(BASE,input), 'r') as file:
         lines = file.readlines()
 
-    # Solutions
-    position_to_insert = 4
-    oldsol = lines[position_to_insert - 1]
-    lines[position_to_insert - 1] = sol1 + char 
+    target = "type solution"
+    index = indexsearch(lines,target)
+    oldsol = lines[index]
+    lines[index] = sol1 + char 
 
-    # Insert partial solutions
-    position_to_insert = 14 
-    oldcol = lines[position_to_insert - 1]
-    lines[position_to_insert - 1] = colors + char   
+    target = f"{predicate} >>"
+    index = indexsearch(lines,target)
+    oldcol = lines[index]
+    lines[index] = colors + char  
 
-    # Insert k
-    position_to_insert = 22
-    oldk = lines[position_to_insert - 1]
-    lines[position_to_insert - 1] = newk + char   
+    target = "k() ="
+    index = indexsearch(lines,target)
+    oldk = lines[index]
+    lines[index] = newk + char   
 
     if(sol1 and colors and newk == None):
         position_to_insert = 22
@@ -87,29 +94,34 @@ def insertSol(input,sol1,colors,newk,char):
         lines[position_to_insert - 1] = newk + char 
 
     BASE = os.path.dirname(os.path.abspath(__file__))
-    input ='online2.idp'
     with open(os.path.join(BASE,input), 'w') as file:
         file.writelines(lines)
 
     return oldsol,oldcol,oldk
 
-def restoreSol(input,sol1,colors,newk,char):
+def restoreSol(input,sol1,colors,newk,char,predicate):
     #Insert solutions
     BASE = os.path.dirname(os.path.abspath(__file__))
     with open(os.path.join(BASE,input), 'r') as file:
         lines = file.readlines()
 
     # Solutions
-    position_to_insert = 4
-    lines[position_to_insert - 1] = sol1 + char 
+    target = "type solution"
+    index = indexsearch(lines,target)
+    oldsol = lines[index]
+    lines[index] = sol1 + char
 
     # Insert partial solutions
-    position_to_insert = 14 
-    lines[position_to_insert - 1] = colors + char 
+    target = f"{predicate} >>"
+    index = indexsearch(lines,target)
+    oldcol = lines[index]
+    lines[index] = colors + char  
 
     # Insert k
-    position_to_insert = 22 
-    lines[position_to_insert - 1] = newk + char 
+    target = "k() ="
+    index = indexsearch(lines,target)
+    oldk = lines[index]
+    lines[index] = newk + char 
 
     BASE = os.path.dirname(os.path.abspath(__file__))
     input ='online2.idp'
@@ -135,12 +147,18 @@ def runIDP_(input):
 
 def main():
     
-    n=5
-    k=186
-    # k=200
+    parser = argparse.ArgumentParser()
+    parser.add_argument('input',type=str,help="Input IDP file")
+    parser.add_argument('n',type=int,help="number of solutions")
+    parser.add_argument('k',type=int,help="distance k")
+    parser.add_argument('predicate',type=str,help="target of the diversity")
 
-    input ='online2.idp'
-    predicate = "ColourOf"
+    args = parser.parse_args()
+
+    input = args.input # input = "online2.idp"
+    n = args.n # n=5
+    k = args.k  # k=186
+    predicate = args.predicate # predicate = "ColourOf"
     
     char = "\n"
     oldtext = []
@@ -155,7 +173,7 @@ def main():
         newk = f"k() = {dist}."
 
 
-        oldsol,oldcol,oldk = insertSol(input,solutions,colors,newk,char)
+        oldsol,oldcol,oldk = insertSol(input,solutions,colors,newk,char,predicate)
         if i == 0:
             oldtext.append(oldsol)
             oldtext.append(oldcol)
@@ -165,7 +183,7 @@ def main():
     if(len(oldtext) == None):
         print("Geen modellen gevonden")
         exit()
-    restoreSol(input,oldtext[0],oldtext[1],oldtext[2],char)
+    restoreSol(input,oldtext[0],oldtext[1],oldtext[2],char,predicate)
 
 if __name__ == "__main__":
 
