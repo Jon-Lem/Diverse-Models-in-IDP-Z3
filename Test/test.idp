@@ -1,0 +1,30 @@
+vocabulary V {
+    //type Index := {1..7}
+    type solution := {s1,s2}
+    //type solution := {s1}
+    //queen : solution * Index * Index -> Bool
+    type Letter := {a,b,c}
+    queen : solution * Letter * Letter -> Bool
+    distance: solution * solution -> Int
+    //n: () -> Int
+    k: () -> Int
+
+}
+
+structure S:V {
+    //queen := {(s1, 1, 4), (s1, 2, 1), (s1, 3, 5), (s1, 4, 2), (s1, 5, 6), (s1, 6, 3), (s1, 7, 7)}.
+    //queen := {(s1,a,a),(s1,a,b),(s1,a,c)}.
+    //n := 7.
+}
+
+theory T:V {
+    queen(s1,a,a) & queen(s1,a,b) & queen(s1,a,c) & queen(s1,b,a) & queen(s1,b,b) & queen(s1,b,c) & queen(s1,c,a) & queen(s1,c,b) & queen(s1,c,c).
+    !sx,sy in solution: distance(sx,sy) = #{i,j in Letter: queen(sx,i,j) ~= queen(sy,i,j)}.    
+    #{x,y in Letter: !s in solution: queen(s,x,y)} = k().
+    k() < sum{{distance(sx,sy) | sx,sy in solution: sx ~= sy }}/2.
+    k() = 4.
+}
+
+procedure main() {
+    pretty_print(model_expand(T,S,max=100))
+}

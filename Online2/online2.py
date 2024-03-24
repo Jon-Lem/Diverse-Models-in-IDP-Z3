@@ -67,11 +67,24 @@ def collect(output,predicate):
     # print(colors)
     return sol1,colors,solutions
 
-def insertSol(input,sol1,colors,newk,char,predicate):
+def insertSol(input,newk,char,sol1=None,colors=None,predicate=None):
     #Insert solutions
     BASE = os.path.dirname(os.path.abspath(__file__))
     with open(os.path.join(BASE,input), 'r') as file:
         lines = file.readlines()
+
+    if(sol1 is None and colors is None and predicate is None ):
+        target = "theory"
+        index = indexsearch(lines,target) + 2
+        lines.insert(index, char)
+        lines[index] = newk + char
+
+        BASE = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(BASE,input), 'w') as file:
+            file.writelines(lines)
+
+        return
+
 
     target = "type solution"
     index = indexsearch(lines,target)
@@ -88,10 +101,10 @@ def insertSol(input,sol1,colors,newk,char,predicate):
     oldk = lines[index]
     lines[index] = newk + char   
 
-    if(sol1 and colors and newk == None):
-        position_to_insert = 22
-        oldk = lines[position_to_insert - 1]
-        lines[position_to_insert - 1] = newk + char 
+    # if(sol1 and colors and newk == None):
+    #     position_to_insert = 22
+    #     oldk = lines[position_to_insert - 1]
+    #     lines[position_to_insert - 1] = newk + char 
 
     BASE = os.path.dirname(os.path.abspath(__file__))
     with open(os.path.join(BASE,input), 'w') as file:
@@ -111,17 +124,17 @@ def restoreSol(input,sol1,colors,newk,char,predicate):
     oldsol = lines[index]
     lines[index] = sol1 + char
 
-    # Insert partial solutions
+    # Restore partial solutions
     target = f"{predicate} >>"
     index = indexsearch(lines,target)
     oldcol = lines[index]
     lines[index] = colors + char  
 
-    # Insert k
+    # Restore k
     target = "k() ="
     index = indexsearch(lines,target)
-    oldk = lines[index]
-    lines[index] = newk + char 
+    del lines[index]
+    # lines[index] = newk + char 
 
     BASE = os.path.dirname(os.path.abspath(__file__))
     input ='online2.idp'
@@ -164,6 +177,9 @@ def main():
     oldtext = []
     for i in range(n - 2):
         # print("hier")
+        if i == 0:
+            newk = f" k() = {(k//n)}."
+            insertSol(input,newk=newk,char=char)
         output = runIDP(input)
         if(output == "No models.\n"):
             break
@@ -173,7 +189,7 @@ def main():
         newk = f"k() = {dist}."
 
 
-        oldsol,oldcol,oldk = insertSol(input,solutions,colors,newk,char,predicate)
+        oldsol,oldcol,oldk = insertSol(input,newk,char,solutions,colors,predicate)
         if i == 0:
             oldtext.append(oldsol)
             oldtext.append(oldcol)
