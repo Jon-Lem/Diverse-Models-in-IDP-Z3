@@ -24,6 +24,6 @@ theory T:V {
 }
 
 procedure main() {
-    pretty_print(model_expand(T, S, timeout_seconds=0, max=10))
+    pretty_print(model_expand(T, S, timeout_seconds=0, max=1))
 }
 

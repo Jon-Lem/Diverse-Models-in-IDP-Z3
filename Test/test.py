@@ -1,43 +1,36 @@
-def insert_empty_line_and_write(filename, position, text_to_write):
-    # Read the content of the file
+import re
+
+original_string = "queen := {(s1, 1, 4), (s1, 2, 1), (s1, 3, 5), (s1, 4, 2), (s1, 5, 6), (s1, 6, 3), (s1, 7, 7), (s2, 1, 6), (s2, 2, 4), (s2, 3, 2), (s2, 4, 7), (s2, 5, 5), (s2, 6, 3), (s2, 7, 1)}."
+
+# Remove unnecessary characters and split into individual tuples
+tuples = original_string.replace("queen := {", "").replace("}.", "").split("), ")
+
+# Format each tuple into the desired format
+formatted_tuples = [f"queen{t[0]}({t[1]}, {t[2]})" for t in [tuple(pair.split(", ")) for pair in tuples]]
+
+# Join the formatted tuples with "&" and enclose them in parentheses
+result = " & ".join(formatted_tuples)
+result = "(" + result + ")."
+
+print(result)
+
+
+color = "ColourOf : (solution * country) -> color"
+
+
+
+def print_line_starting_with(filename, word):
     with open(filename, 'r') as file:
-        lines = file.readlines()
-
-    for index,line in enumerate(lines):
-        if line.strip().startswith("theory"):
-            position =index+1
-
-    # Insert an empty line at the specified position
-    lines.insert(position, '\n')  # Adjust position to 0-based index
-
-    # Write the text to the empty line
-    lines[position] = text_to_write + '\n'  # Adjust position to 0-based index
-
-    # Write the modified content back to the file
-    with open(filename, 'w') as file:
-        file.writelines(lines)
-
-def undo_insert_empty_line_and_write(filename, position):
-    # Read the content of the file
-    with open(filename, 'r') as file:
-        lines = file.readlines()
-
-    # Check if the line at the specified position is an empty line
-    if lines[position - 1].strip() == '':
-        # Remove the empty line and the text written on it
-        del lines[position - 1]
-        del lines[position - 1]
-
-        # Write the modified content back to the file
-        with open(filename, 'w') as file:
-            file.writelines(lines)
-    else:
-        print("Error: No empty line with text found at the specified position.")
-
+        for line in file:
+            if line.lstrip().startswith(word):
+                print(line.rstrip())  # rstrip() removes any trailing newline characters
+                return line.rstrip()
 # Example usage:
-filename = 'test.txt'  # Replace 'example.txt' with the path to your file
-position = 5  # Specify the position where you want to insert the empty line
-text_to_write = 'This is some text to write on the empty line'
+filename = 'test.txt'  # Replace 'your_file.txt' with the path to your file
+word = 'ColourOf'  # Replace 'example_word' with the word you're looking for
 
-insert_empty_line_and_write(filename, position, text_to_write)
-undo_insert_empty_line_and_write(filename, position)
+print(f"Lines starting with '{word}':")
+color = print_line_starting_with(filename, word)
+
+lastword = re.search(r"\s*([\S]+)$",color)
+print(lastword.group())
