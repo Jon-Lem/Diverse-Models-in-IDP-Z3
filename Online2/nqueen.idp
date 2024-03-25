@@ -28,7 +28,7 @@ theory T:V {
     !sx,sy in solution: distance(sx,sy) = #{x,y in Index: queen(sx,x,y) ~= queen(sy,x,y)}/2.
     k() < sum{{distance(sx,sy) | sx,sy in solution: sx ~= sy }}/2.
 
-    k() = 4.
+    //k() = 4.
 }
 
 procedure main() {

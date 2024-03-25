@@ -30,22 +30,21 @@ def runIDP(input,goal):
     output = f.getvalue()
     # print(output)
 
-    print("hier1")
     # print(lines)
     for line in lines:
         # print("hier")
         if line.lstrip().startswith(goal):
-            print(line.rstrip())  # rstrip() removes any trailing newline characters
+            # print(line.rstrip())  # rstrip() removes any trailing newline characters
             range = line.rstrip()
             break
     
-    range = re.search(r"\s*([\S]+)$",range).group()
-    print(range)
+    range = re.search(r"\s*([\S]+)$",range).group().lstrip()
+    # print(range)
     if(range == "Bool" or range == "Int" or range == "Float" or range == "Real"):
-        print("Predicate")
+        # print("Predicate")
         pred_or_func = 0
     else:
-        print("Function")
+        # print("Function")
         pred_or_func = 1
 
     return output, pred_or_func
@@ -84,22 +83,36 @@ def collect(output,goal,pred_or_func):
 
     # print(matches)  
     if(pred_or_func == 1):
-        colors = f'{goal} >> '
+        partsol = f'{goal} >> '
         if(len(matches) < 1):
             return
-        colors+=matches[0] #HIER KAN HET PROGRAMMA CRASHEN
+        partsol+=matches[0] #HIER KAN HET PROGRAMMA CRASHEN
     else:
-        print("wenen")
-    # print(colors)
-    return sol1,colors,solutions
+        # print("wenen")
+        # tuples = matches[0].replace(goal + " := {", "").replace("}.", "").split("), ")
+        # print(tuples)
+        # formatted_tuples = [f"{goal}{t[0]}, {t[1]}, {t[2]})" for t in [tuple(pair.split(", ")) for pair in tuples]]
+        # print(formatted_tuples)
 
-def insertSol(input,newk,char,sol1=None,colors=None,goal=None):
+        tuples_pattern = re.compile(r'\((.*?)\)')
+        tuples = tuples_pattern.findall(matches[0])
+        # print(tuples)
+
+        formatted_tuples = [f"{goal}({t})" for t in tuples]
+        # print(formatted_tuples)
+        partsol = " & ".join(formatted_tuples)
+        partsol = partsol + "."
+
+    # print(partsol)
+    return sol1,partsol,solutions
+
+def insertSol(input,newk,char,pred_or_func=None,sol1=None,partsol=None,goal=None):
     #Insert solutions
     BASE = os.path.dirname(os.path.abspath(__file__))
     with open(os.path.join(BASE,input), 'r') as file:
         lines = file.readlines()
 
-    if(sol1 is None and colors is None and goal is None ):
+    if(sol1 is None and partsol is None and goal is None ):
         target = "theory"
         index = indexsearch(lines,target) + 2
         lines.insert(index, char)
@@ -118,28 +131,26 @@ def insertSol(input,newk,char,sol1=None,colors=None,goal=None):
     lines[index] = sol1 + char 
 
     # The goal is a function
-    target = f"{goal} >>"
+    if(pred_or_func == 1):
+        target = f"{goal} >>"
+    else:
+        target = f"{goal}("
     index = indexsearch(lines,target)
     oldcol = lines[index]
-    lines[index] = colors + char  
+    lines[index] = partsol + char  
 
     target = "k() ="
     index = indexsearch(lines,target)
     oldk = lines[index]
     lines[index] = newk + char   
-
-    # if(sol1 and colors and newk == None):
-    #     position_to_insert = 22
-    #     oldk = lines[position_to_insert - 1]
-    #     lines[position_to_insert - 1] = newk + char 
-
+ 
     BASE = os.path.dirname(os.path.abspath(__file__))
     with open(os.path.join(BASE,input), 'w') as file:
         file.writelines(lines)
 
     return oldsol,oldcol,oldk
 
-def restoreSol(input,sol1,colors,newk,char,goal):
+def restoreSol(input,sol1,partsol,newk,pred_or_func,char,goal):
     #Insert solutions
     BASE = os.path.dirname(os.path.abspath(__file__))
     with open(os.path.join(BASE,input), 'r') as file:
@@ -152,10 +163,13 @@ def restoreSol(input,sol1,colors,newk,char,goal):
     lines[index] = sol1 + char
 
     # Restore partial solutions
-    target = f"{goal} >>"
+    if(pred_or_func == 1):
+        target = f"{goal} >>"
+    else:
+        target = f"{goal}("
     index = indexsearch(lines,target)
     oldcol = lines[index]
-    lines[index] = colors + char  
+    lines[index] = partsol + char  
 
     # Restore k
     target = "k() ="
@@ -188,7 +202,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('input',type=str,help="Input IDP file")
     parser.add_argument('n',type=int,help="number of solutions")
-    parser.add_argument('k',type=int,help="distance k")
+    parser.add_argument('k',type=int,help="total distance k")
     parser.add_argument('goal',type=str,help="target of the diversity")
 
     args = parser.parse_args()
@@ -200,6 +214,7 @@ def main():
     
     char = "\n"
     oldtext = []
+    # pred_or_func = 0
     for i in range(n - 2):
         # print("hier")
         if i == 0:
@@ -208,13 +223,13 @@ def main():
         output, pred_or_func = runIDP(input,goal)
         if(output == "No models.\n"):
             break
-        solutions,colors,sol=collect(output,goal,pred_or_func)
+        solutions,partsol,sol=collect(output,goal,pred_or_func)
         dist = len(sol)*k//n
         print(f"distance: {dist}")
         newk = f"k() = {dist}."
 
 
-        oldsol,oldcol,oldk = insertSol(input,newk,char,solutions,colors,goal)
+        oldsol,oldcol,oldk = insertSol(input,newk,char,pred_or_func,solutions,partsol,goal)
         if i == 0:
             oldtext.append(oldsol)
             oldtext.append(oldcol)
@@ -224,7 +239,7 @@ def main():
     if(len(oldtext) == None):
         print("Geen modellen gevonden")
         exit()
-    restoreSol(input,oldtext[0],oldtext[1],oldtext[2],char,goal)
+    restoreSol(input,oldtext[0],oldtext[1],oldtext[2],pred_or_func,char,goal)
 
 if __name__ == "__main__":
 
