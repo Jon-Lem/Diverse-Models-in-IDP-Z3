@@ -1,0 +1,3 @@
+relevant `<predicate or function>
+
+    This predicate or function will be the objective for diversity, among the models

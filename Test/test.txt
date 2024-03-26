@@ -20,7 +20,7 @@ This is some text to write on the empty line
 
   //!s in solution,c1,c2 in country: Bordering(c1,c2) => ColourOf(s,c1) ~= ColourOf(s,c2).
   !sx,sy in solution: distance(sx,sy) = #{c in country: ColourOf(sx,c) ~= ColourOf(sy,c)}.
-  k() = 33. 
+  
   k() < sum{{distance(sx,sy) | sx,sy in solution: sx ~= sy }}/2.
     
 }
