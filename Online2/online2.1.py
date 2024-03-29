@@ -3,24 +3,28 @@ import contextlib
 import io, re, os
 import argparse
 
+def printCode(lines):
+    [print(i) for i in lines]
+    return
+
 def indexsearch(lines,target):
     for index,line in enumerate(lines):
         if line.strip().startswith(target):
             return index
     return -1
 
-
-def runIDP(input,goal):
-    print("runIDP")
+def readCode(input):
     lines = []
-    code=""
     BASE = os.path.dirname(os.path.abspath(__file__))
     with open(os.path.join(BASE,input), 'r') as file:
         # code = file.read()
         lines = file.readlines()
     
-    for line in lines:
-        code += line
+    return lines
+
+def runIDP(lines,goal):
+    print("runIDP")
+    code = "".join(lines)
     kb = IDP.from_str(code)
     f = io.StringIO()
     with contextlib.redirect_stdout(f):
@@ -28,9 +32,6 @@ def runIDP(input,goal):
         kb.execute()
 
     output = f.getvalue()
-    # print(output)
-
-    # print(lines)
     for line in lines:
         # print("hier")
         if line.lstrip().startswith(goal):
@@ -88,38 +89,30 @@ def collect(output,goal,pred_or_func):
             return
         partsol+=matches[0] #HIER KAN HET PROGRAMMA CRASHEN
     else:
- 
+
         tuples_pattern = re.compile(r'\((.*?)\)')
         tuples = tuples_pattern.findall(matches[0])
+        # print(tuples)
+
         formatted_tuples = [f"{goal}({t})" for t in tuples]
+        # print(formatted_tuples)
         partsol = " & ".join(formatted_tuples)
         partsol = partsol + "."
 
     # print(partsol)
     return sol1,partsol,solutions
 
-def insertSol(input,newk,char,pred_or_func=None,sol1=None,partsol=None,goal=None):
-    #Insert solutions
-    BASE = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(BASE,input), 'r') as file:
-        lines = file.readlines()
+def insertSol(lines,newk,char,pred_or_func=None,sol1=None,partsol=None,goal=None):
 
     if(sol1 is None and partsol is None and goal is None ):
         target = "theory"
         index = indexsearch(lines,target) + 2
         lines.insert(index, char)
         lines[index] = newk + char
-
-        BASE = os.path.dirname(os.path.abspath(__file__))
-        with open(os.path.join(BASE,input), 'w') as file:
-            file.writelines(lines)
-
         return
-
-
+    
     target = "type solution"
     index = indexsearch(lines,target)
-    oldsol = lines[index]
     lines[index] = sol1 + char 
 
     # The goal is a function
@@ -128,59 +121,18 @@ def insertSol(input,newk,char,pred_or_func=None,sol1=None,partsol=None,goal=None
     else:
         target = f"{goal}("
     index = indexsearch(lines,target)
-    oldcol = lines[index]
     lines[index] = partsol + char  
 
     target = "k() ="
     index = indexsearch(lines,target)
-    oldk = lines[index]
     lines[index] = newk + char   
  
-    BASE = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(BASE,input), 'w') as file:
-        file.writelines(lines)
-
-    return oldsol,oldcol,oldk
-
-def restoreSol(input,sol1,partsol,newk,pred_or_func,char,goal):
-    #Insert solutions
-    BASE = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(BASE,input), 'r') as file:
-        lines = file.readlines()
-
-    # Solutions
-    target = "type solution"
-    index = indexsearch(lines,target)
-    oldsol = lines[index]
-    lines[index] = sol1 + char
-
-    # Restore partial solutions
-    if(pred_or_func == 1):
-        target = f"{goal} >>"
-    else:
-        target = f"{goal}("
-    index = indexsearch(lines,target)
-    oldcol = lines[index]
-    lines[index] = partsol + char  
-
-    # Restore k
-    target = "k() ="
-    index = indexsearch(lines,target)
-    del lines[index]
-    # lines[index] = newk + char 
-
-    BASE = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(BASE,input), 'w') as file:
-        file.writelines(lines)
+    return 
 
 
-def runIDP_(input):
-    BASE = os.path.dirname(os.path.abspath(__file__))
+def runIDP_(lines):
 
-    with open(os.path.join(BASE,input), 'r') as file:
-
-        code = file.read()
-
+    code = "".join(lines)
     kb = IDP.from_str(code)
     f = io.StringIO()
     with contextlib.redirect_stdout(f):
@@ -207,12 +159,14 @@ def main():
     char = "\n"
     oldtext = []
     # pred_or_func = 0
+    lines = readCode(input)
     for i in range(n - 2):
         # print("hier")
         if i == 0:
             newk = f" k() = {(k//n)}."
-            insertSol(input,newk=newk,char=char)
-        output, pred_or_func = runIDP(input,goal)
+            insertSol(lines,newk=newk,char=char)
+            # printCode(lines)
+        output, pred_or_func = runIDP(lines,goal)
         if(output == "No models.\n"):
             break
         solutions,partsol,sol=collect(output,goal,pred_or_func)
@@ -220,18 +174,14 @@ def main():
         print(f"distance: {dist}")
         newk = f"k() = {dist}."
 
+        insertSol(lines,newk,char,pred_or_func,solutions,partsol,goal)
+        # printCode(lines)
 
-        oldsol,oldcol,oldk = insertSol(input,newk,char,pred_or_func,solutions,partsol,goal)
-        if i == 0:
-            oldtext.append(oldsol)
-            oldtext.append(oldcol)
-            oldtext.append(oldk)
     char = ""
-    runIDP_(input)
+    runIDP_(lines)
     if(len(oldtext) == None):
         print("Geen modellen gevonden")
         exit()
-    restoreSol(input,oldtext[0],oldtext[1],oldtext[2],pred_or_func,char,goal)
 
 if __name__ == "__main__":
 
