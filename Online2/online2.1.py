@@ -2,6 +2,7 @@ from idp_engine import IDP
 import contextlib
 import io, re, os
 import argparse
+import time
 
 def printCode(lines):
     [print(i) for i in lines]
@@ -184,5 +185,6 @@ def main():
         exit()
 
 if __name__ == "__main__":
-
+    start_time = time.time()
     main()
+    print("--- %s seconds ---" % (time.time() - start_time))

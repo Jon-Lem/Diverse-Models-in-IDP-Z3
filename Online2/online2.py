@@ -2,6 +2,7 @@ from idp_engine import IDP
 import contextlib
 import io, re, os
 import argparse
+import time
 
 def indexsearch(lines,target):
     for index,line in enumerate(lines):
@@ -234,5 +235,6 @@ def main():
     restoreSol(input,oldtext[0],oldtext[1],oldtext[2],pred_or_func,char,goal)
 
 if __name__ == "__main__":
-
+    start_time = time.time()
     main()
+    print("--- %s seconds ---" % (time.time() - start_time))
