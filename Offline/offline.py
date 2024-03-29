@@ -3,7 +3,7 @@ import contextlib
 import io, re, os
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-input ='mapcoloring.idp'
+input ='../Base/mapcoloring.idp'
 
 with open(os.path.join(BASE,input), 'r') as file:
 
@@ -71,7 +71,10 @@ solu += "}"
 print(solu)
 
 # Open the file in read mode
-with open('/home/jonas/Documents/MP/IDP/Offline/cluster.idp', 'r') as file:
+BASE = os.path.dirname(os.path.abspath(__file__))
+input ='cluster.idp'
+
+with open(os.path.join(BASE,input), 'r') as file:
     lines = file.readlines()
 
 # Insert the new line at the desired position

@@ -1,0 +1,22 @@
+vocabulary V {
+    type Index := {1..5}
+    queen : Index * Index -> Bool
+    n: () -> Int
+}
+
+structure S:V {
+   n := 5.
+}
+
+theory T:V {
+
+    !x,y,u,v in Index: queen(x,y) & queen(u,v) & x~=u & y~=v  => (v ~= -u + x + y).
+    !x,y,u,v in Index: queen(x,y) & queen(u,v) & x~=u & y~=v => (v ~= u - x + y).
+    !x,y,u,v in Index: queen(x,y) & queen(u,v) & y~=v => (x ~= u).
+    !x,y,u,v in Index: queen(x,y) & queen(u,v) & x~=u => (y ~= v).
+    #{x,y in Index: queen(x,y)} = n().
+}
+
+procedure main() {
+    pretty_print(model_expand(T, S,max=100))
+}
