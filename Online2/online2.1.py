@@ -1,3 +1,6 @@
+# Programma dat zoekt naar n oplossingen die een totale afstand hebben van k
+# Dus k is de som van d(sx,sy) voor sx,sy deel van de oplossingen verzameling
+
 from idp_engine import IDP
 import contextlib
 import io, re, os
@@ -140,7 +143,7 @@ def runIDP_(lines):
 
         kb.execute()
     output = f.getvalue()
-    print(output)
+    # print(output)
 
 def main():
     
@@ -161,14 +164,24 @@ def main():
     oldtext = []
     # pred_or_func = 0
     lines = readCode(input)
-    for i in range(n - 2):
+    if n == 2:
+        reach = 1
+        newk = f" k() = {k}."
+    elif n<2:
+        print("n moet groter zijn dan 1")
+        exit()
+    else:
+        reach = n-2
+        newk = f" k() = {(k//n)}."
+    for i in range(reach):
         # print("hier")
-        if i == 0:
-            newk = f" k() = {(k//n)}."
+        if i == 0:    
+            print(newk)
             insertSol(lines,newk=newk,char=char)
             # printCode(lines)
         output, pred_or_func = runIDP(lines,goal)
-        if(output == "No models.\n"):
+        print(output)
+        if(output == "No models.\n" or n == 2):
             break
         solutions,partsol,sol=collect(output,goal,pred_or_func)
         dist = len(sol)*k//n

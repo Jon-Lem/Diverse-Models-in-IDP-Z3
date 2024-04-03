@@ -1,11 +1,11 @@
 vocabulary V {
-    type Index := {1..7}
+    type Index := {1..5}
     queen : Index * Index -> Bool
     n: () -> Int
 }
 
 structure S:V {
-   n := 7.
+   n := 5.
 }
 
 theory T:V {
