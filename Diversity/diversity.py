@@ -24,5 +24,5 @@ class idp(IDP):
     
     
     def diverse_model_generation(n:int,k:int,relevant:str,method:str):
-        return
-
+        if method == "Online1":
+            idp_code = change_idp_file(n,k,relevant)

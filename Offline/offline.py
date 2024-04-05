@@ -1,9 +1,19 @@
 from idp_engine import IDP
 import contextlib
 import io, re, os
+from typing import Iterator
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 input ='../Base/mapcoloring.idp'
+
+def readCode(input:str) -> Iterator[str]:
+    lines = []
+    BASE = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(BASE,input), 'r') as file:
+        # code = file.read()
+        lines = file.readlines()
+    
+    return lines
 
 with open(os.path.join(BASE,input), 'r') as file:
 

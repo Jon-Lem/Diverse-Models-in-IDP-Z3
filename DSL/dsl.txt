@@ -1,3 +1,16 @@
-relevant `<predicate or function>
-
-    This predicate or function will be the objective for diversity, among the models
+voc v:{
+salary:() -> Int
+...}
+ 
+theory T:V{
+...orginal IDP programma
+}
+ 
+voc diversity{
+import v
+isZero:() -> Bool
+}
+ 
+theory T_div:diversity{
+isZero() <=> salary()=0.
+}
