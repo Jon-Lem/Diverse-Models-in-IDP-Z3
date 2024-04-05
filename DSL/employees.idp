@@ -1,0 +1,61 @@
+vocabulary V {
+    type Employee := {Jef,Joe,Anne,Mike,John,Alex,Tim}
+    type Department := {Sales,IT,HR,Finance,Marketing,Production,None}
+    salary : Employee -> Int
+    leads : Employee -> Department
+    worksIn : Employee -> Department 
+}
+
+structure {
+
+salary := {Jef -> 500, Joe -> 1000, Anne -> 200, Mike -> 400, John -> 600,Alex -> 0, Tim -> 0}.
+leads := {Jef -> IT,Joe -> None, Anne -> Sales, Mike -> None, John -> None,Alex -> None, Tim -> None}.
+worksIn >> {Jef -> IT, Joe -> Sales, Anne -> Sales, Mike -> Production}.
+}
+
+vocabulary diversity{
+
+import V
+relevant: Employee -> Bool
+isZero: Employee -> Bool
+sumSalary: () -> Int
+dsl: Employee -> Bool
+
+}
+theory T:V {
+
+!e in Employee: worksIn(e) ~= None.
+
+}
+
+theory T_div:diversity {
+
+//ABSTRACT
+//!e in Employee: isZero(e) <=> salary(e) = 0.
+
+//RELEVANCE
+// Only Department leaders are relevant
+//!e in Employee: relevant(e) <=> worksIn(e) = IT.
+
+//AGGREGATE
+// Sum the salaries of employees that work in IT
+//sumSalary() = sum{{ salary(e) | e in Employee: relevant(e)}}.
+
+//RELEVANCE ABSTRACT AGGREGATE
+{
+    !e in Employee: dsl(e) <- salary(e) > 0 
+    & leads(e) ~= None 
+    & worksIn(e) = IT.
+
+    //Al deze lijnen apart werken niet meer samen tot een geheel?
+    //!e in Employee: dsl(e) <- salary(e) > 0.
+    //!e in Employee: dsl(e) <- leads(e) ~= None.
+    //!e in Employee: dsl(e) <- worksIn(e) = IT.
+}
+sumSalary() = sum{{ salary(e) | e in Employee: dsl(e)}}.
+
+}
+
+procedure main() {
+    pretty_print(model_expand(T , T_div, S, timeout_seconds=0,max=500))
+}
