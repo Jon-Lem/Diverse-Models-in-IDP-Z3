@@ -1,11 +1,12 @@
 vocabulary V {
     type Index := {1..5}
-    type solution := {s1,s2} // aantal solutions  n = 2 
-    //type solution := {s1}
+    //type solution := {s1,s2} // aantal solutions  n = 2 
+    type solution := {s1}
     queen : solution * Index * Index -> Bool
     distance: solution * solution -> Int
-    n: () -> Int
     k: () -> Int
+    n: () -> Int
+
 
 }
 
@@ -18,7 +19,7 @@ theory T:V {
     //queen(s1, 1, 4) & queen(s1, 2, 1) & queen(s1, 3, 5) & queen(s1, 4, 2) & queen(s1, 5, 6) & queen(s1, 6, 3) & queen(s1, 7, 7).
     
     //Queens bij n=5
-    queen(s1,1, 4) & queen(s1,2, 1) & queen(s1,3, 3) & queen(s1,4, 5) & queen(s1,5, 2).
+    //queen(s1,1, 4) & queen(s1,2, 1) & queen(s1,3, 3) & queen(s1,4, 5) & queen(s1,5, 2).
 
     !s in solution: !x,y,u,v in Index: queen(s,x,y) & queen(s,u,v) & x~=u & y~=v  => (v ~= -u + x + y).
     !s in solution: !x,y,u,v in Index: queen(s,x,y) & queen(s,u,v) & x~=u & y~=v => (v ~= u - x + y).

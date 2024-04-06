@@ -15,8 +15,7 @@ theory T:V {
     !x,y,u,v in Index: queen(x,y) & queen(u,v) & y~=v => (x ~= u).
     !x,y,u,v in Index: queen(x,y) & queen(u,v) & x~=u => (y ~= v).
 
-    //!x,y in Index: queen(x,y)  => (~?u in Index: queen(u,y) & u ~= x).
-    //!x,y in Index: queen(x,y)  => (~?v in Index: queen(x,v) & v ~= y).
+
 
     #{x,y in Index: queen(x,y)} = n().
 }

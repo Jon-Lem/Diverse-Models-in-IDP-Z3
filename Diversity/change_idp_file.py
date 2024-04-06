@@ -59,7 +59,7 @@ def dist_expr(relation:str,goal:str) -> str:
 
     
 
-def insertSol(lines:list,n:int,k:int,goal:str):
+def insertCode(lines:list,n:int,k:int,goal:str):
 
     type_sol = "type solution := {"
     for i in range(1,n):
@@ -69,7 +69,7 @@ def insertSol(lines:list,n:int,k:int,goal:str):
     # k_struc = f"k := {k}."
     k_theory = f"k() = {k}."
     dist_voc = "distance: solution * solution -> Int"
-    k_dist_theory = " sum{{distance(solution__x,solution__y) | solution__x,solution__y in solution: solution__x ~= solution__y }}/2 > k()."
+    k_dist_theory = " sum{{distance(solution__x,solution__y) | solution__x,solution__y in solution: solution__x ~= solution__y }}/2 >= k()."
     end = "\n"
 
     # Update predicate/function
@@ -112,36 +112,15 @@ def insertSol(lines:list,n:int,k:int,goal:str):
 
     return 
 
-def main():
-    
-    parser = argparse.ArgumentParser()
-    parser.add_argument('input',type=str,help="Input IDP file")
-    parser.add_argument('n',type=int,help="number of solutions")
-    parser.add_argument('k',type=int,help="total distance k")
-    parser.add_argument('goal',type=str,help="target of the diversity")
-    args = parser.parse_args()
+def checkPredFunc(lines:list,relevant:str) -> int:
 
-    input = args.input # input = "<naam>.idp"
-    n = args.n # n=5
-    k = args.k  # k=186
-    goal = args.goal # goal = "ColourOf"
+    index = indexsearch(lines,relevant)
+    range = lines[index].split("->")[1].strip()
+    if(range == "Bool" or range == "Int" or range == "Float" or range == "Real"):
+        # print("Predicate")
+        pred_or_func = 0
+    else:
+        # print("Function")
+        pred_or_func = 1
 
-    for i in range(1,n+1):
-        if i == 1:
-            k=0
-        elif i == 2:
-            k=args.k/n
-        else:
-            k=i*args.k//n
-
-        
-        lines = readCode(input)
-        insertSol(lines,i,k,goal)
-        printCode(lines)
-        output = runCode(lines)
-        print(output)
-        break
-if __name__ == "__main__":
-    start_time = time.time()
-    main()
-    print("--- %s seconds ---" % (time.time() - start_time))
+    return pred_or_func
