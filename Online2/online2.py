@@ -1,194 +1,114 @@
+# Programma dat zoekt naar n oplossingen die een totale afstand hebben van k
+# Dus k is de som van d(sx,sy) voor sx,sy deel van de oplossingen verzameling
+
 from idp_engine import IDP
 import contextlib
 import io, re, os
 import argparse
 import time
+from typing import Iterator
 
-def indexsearch(lines,target):
+def printCode(lines):
+    [print(i) for i in lines]
+    return
+
+def indexsearch(lines:list,target:str) -> int:
     for index,line in enumerate(lines):
         if line.strip().startswith(target):
             return index
     return -1
 
-
-def runIDP(input,goal):
-    print("runIDP")
+def readCode(input:str) -> Iterator[str]:
     lines = []
-    code=""
     BASE = os.path.dirname(os.path.abspath(__file__))
     with open(os.path.join(BASE,input), 'r') as file:
         # code = file.read()
         lines = file.readlines()
     
-    for line in lines:
-        code += line
+    return lines
+
+def runCode(lines):
+
+    code = "".join(lines)
     kb = IDP.from_str(code)
     f = io.StringIO()
     with contextlib.redirect_stdout(f):
 
         kb.execute()
-
     output = f.getvalue()
-    # print(output)
-
-    # print(lines)
-    for line in lines:
-        # print("hier")
-        if line.lstrip().startswith(goal):
-            # print(line.rstrip())  # rstrip() removes any trailing newline characters
-            range = line.rstrip()
-            break
     
-    range = re.search(r"\s*([\S]+)$",range).group().lstrip()
-    # print(range)
-    if(range == "Bool" or range == "Int" or range == "Float" or range == "Real"):
-        # print("Predicate")
-        pred_or_func = 0
-    else:
-        # print("Function")
-        pred_or_func = 1
+    return output
 
-    return output, pred_or_func
+# Haal de belangrijkste 
+def dist_expr(relation:str,goal:str) -> str:
+    # relation = " Index * Index -> Bool"
+    # goal = "queen"
+    relation = relation.split("->")[0].strip()
+    relation = relation.split("*")
+    relation= [i.strip() for i in relation]
+    relation = [(x,relation.count(x)) for x in set(relation)]
+    # print(relation)
+    dist_theory = "!solution__x,solution__y in solution: distance(solution__x,solution__y) = #{"   
+    for word,count in relation:
+        element = ','.join([f"{word}__{i}" for i in range(count)])
+        dist_theory += f"{element} in {word}: {goal}(solution__x,{element}) ~= {goal}(solution__y,{element})" 
+    dist_theory += "}/2."
+    # print(dist_theory)
+    # print(element)
+    return dist_theory
 
+    
 
-def collect(output,goal,pred_or_func):
-    # Collect solutions
-    matches = []
-    solutions = []
-    pattern = r'distance :='
-    s_pattern = r"(s\d+)"
-    cpattern = re.escape(goal) + r' := (.*)'
+def insertSol(lines:list,n:int,k:int,goal:str):
 
-    for line in output.split('\n'):
-        
-        index = line.find(pattern)
-        if index != -1: 
-            match = re.findall(s_pattern, line)
-            if match:            
-                match = set(match)
-                match = list(match)
-                match.sort()
-                match.append(f"s{len(match)+1}")
-                solutions = match
+    type_sol = "type solution := {"
+    for i in range(1,n):
+        type_sol += f"s{i},"
+    type_sol+=f"s{n}" + "}"
+    k_voc = "k: () -> Int"
+    k_struc = f"k := {k}."
+    dist_voc = "distance: solution * solution -> Int"
+    k_dist_theory = " sum{{distance(solution__x,solution__y) | solution__x,solution__y in solution: solution__x ~= solution__y }}/2 > k()."
+    end = "\n"
 
-        matched = re.findall(cpattern, line)
-        if matched:
-            matches += matched   
-
-    sol1="type solution := {"
-    for i in solutions:
-        sol1 += f"{i},"
-    sol1 = sol1[:-1]
-    sol1 +="}"
-    # print(sol1)
-
-    # print(matches)  
-    if(pred_or_func == 1):
-        partsol = f'{goal} >> '
-        if(len(matches) < 1):
-            return
-        partsol+=matches[0] #HIER KAN HET PROGRAMMA CRASHEN
-    else:
- 
-        tuples_pattern = re.compile(r'\((.*?)\)')
-        tuples = tuples_pattern.findall(matches[0])
-        formatted_tuples = [f"{goal}({t})" for t in tuples]
-        partsol = " & ".join(formatted_tuples)
-        partsol = partsol + "."
-
-    # print(partsol)
-    return sol1,partsol,solutions
-
-def insertSol(input,newk,char,pred_or_func=None,sol1=None,partsol=None,goal=None):
-    #Insert solutions
-    BASE = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(BASE,input), 'r') as file:
-        lines = file.readlines()
-
-    if(sol1 is None and partsol is None and goal is None ):
-        target = "theory"
-        index = indexsearch(lines,target) + 2
-        lines.insert(index, char)
-        lines[index] = newk + char
-
-        BASE = os.path.dirname(os.path.abspath(__file__))
-        with open(os.path.join(BASE,input), 'w') as file:
-            file.writelines(lines)
-
-        return
-
-
-    target = "type solution"
+    # Update predicate/function
+    target=f"{goal}"
     index = indexsearch(lines,target)
-    oldsol = lines[index]
-    lines[index] = sol1 + char 
+    if(index == -1):
+        print("Error: couldn't be found")
+        exit()
+    # print(lines[index])
+    dist_theory = dist_expr(lines[index].split(':')[1],goal)
+    lines[index] = lines[index].split(':')[0] + ": solution *" + lines[index].split(':')[1]
+    
 
-    # The goal is a function
-    if(pred_or_func == 1):
-        target = f"{goal} >>"
-    else:
-        target = f"{goal}("
+    lines.insert(index,type_sol + end)
+    lines.insert(index+2,k_voc + end)
+    lines.insert(index+2,dist_voc +end )
+
+
+    target="structure"
     index = indexsearch(lines,target)
-    oldcol = lines[index]
-    lines[index] = partsol + char  
+    lines.insert(index+1,k_struc + end)
 
-    target = "k() ="
+    target="theory"
     index = indexsearch(lines,target)
-    oldk = lines[index]
-    lines[index] = newk + char   
- 
-    BASE = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(BASE,input), 'w') as file:
-        file.writelines(lines)
+    # Update existing theory with solution type
+    goal_theory_idx = [i for i in range(len(lines)) if goal in lines[i]]
+    # print(goal_theory_idx)
+    pattern = r'\b' + re.escape(goal) + r'\s*\((.*?)\)'
+    for i in goal_theory_idx:
+        if i < index:
+            continue
+        lines[i] = re.sub(pattern, re.escape(goal) + r'(solution__0, \1)', lines[i])
+        lines[i] = "!solution__0 in solution:" + lines[i]
+        # print(lines[i])
+    # Add parts to theory
+    lines.insert(index+1,k_dist_theory + end)
+    lines.insert(index+1,dist_theory + end)
+    # printCode(lines)
 
-    return oldsol,oldcol,oldk
-
-def restoreSol(input,sol1,partsol,newk,pred_or_func,char,goal):
-    #Insert solutions
-    BASE = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(BASE,input), 'r') as file:
-        lines = file.readlines()
-
-    # Solutions
-    target = "type solution"
-    index = indexsearch(lines,target)
-    oldsol = lines[index]
-    lines[index] = sol1 + char
-
-    # Restore partial solutions
-    if(pred_or_func == 1):
-        target = f"{goal} >>"
-    else:
-        target = f"{goal}("
-    index = indexsearch(lines,target)
-    oldcol = lines[index]
-    lines[index] = partsol + char  
-
-    # Restore k
-    target = "k() ="
-    index = indexsearch(lines,target)
-    del lines[index]
-    # lines[index] = newk + char 
-
-    BASE = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(BASE,input), 'w') as file:
-        file.writelines(lines)
-
-
-def runIDP_(input):
-    BASE = os.path.dirname(os.path.abspath(__file__))
-
-    with open(os.path.join(BASE,input), 'r') as file:
-
-        code = file.read()
-
-    kb = IDP.from_str(code)
-    f = io.StringIO()
-    with contextlib.redirect_stdout(f):
-
-        kb.execute()
-    output = f.getvalue()
-    print(output)
+    return 
 
 def main():
     
@@ -197,42 +117,28 @@ def main():
     parser.add_argument('n',type=int,help="number of solutions")
     parser.add_argument('k',type=int,help="total distance k")
     parser.add_argument('goal',type=str,help="target of the diversity")
-
     args = parser.parse_args()
 
     input = args.input # input = "<naam>.idp"
     n = args.n # n=5
     k = args.k  # k=186
     goal = args.goal # goal = "ColourOf"
-    
-    char = "\n"
-    oldtext = []
-    # pred_or_func = 0
-    for i in range(n - 2):
-        # print("hier")
-        if i == 0:
-            newk = f" k() = {(k//n)}."
-            insertSol(input,newk=newk,char=char)
-        output, pred_or_func = runIDP(input,goal)
-        if(output == "No models.\n"):
-            break
-        solutions,partsol,sol=collect(output,goal,pred_or_func)
-        dist = len(sol)*k//n
-        print(f"distance: {dist}")
-        newk = f"k() = {dist}."
 
+    for i in range(1,n+1):
+        if i == 1:
+            k=0
+        elif i == 2:
+            k=args.k/n
+        else:
+            k=i*args.k//n
 
-        oldsol,oldcol,oldk = insertSol(input,newk,char,pred_or_func,solutions,partsol,goal)
-        if i == 0:
-            oldtext.append(oldsol)
-            oldtext.append(oldcol)
-            oldtext.append(oldk)
-    char = ""
-    runIDP_(input)
-    if(len(oldtext) == None):
-        print("Geen modellen gevonden")
+        
+        lines = readCode(input)
+        insertSol(lines,i,k,goal)
+        printCode(lines)
+        output = runCode(lines)
+        print(output)
         exit()
-    restoreSol(input,oldtext[0],oldtext[1],oldtext[2],pred_or_func,char,goal)
 
 if __name__ == "__main__":
     start_time = time.time()
