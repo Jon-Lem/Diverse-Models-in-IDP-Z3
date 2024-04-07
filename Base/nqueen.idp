@@ -9,7 +9,6 @@ structure S:V {
 }
 
 theory T:V {
-
     !x,y,u,v in Index: queen(x,y) & queen(u,v) & x~=u & y~=v  => (v ~= -u + x + y).
     !x,y,u,v in Index: queen(x,y) & queen(u,v) & x~=u & y~=v => (v ~= u - x + y).
     !x,y,u,v in Index: queen(x,y) & queen(u,v) & y~=v => (x ~= u).
