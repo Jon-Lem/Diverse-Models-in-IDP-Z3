@@ -54,6 +54,17 @@ def simMatrix(output,goal):
     
     return simMat
 
+def clustering(simMat,k):
+    model = AgglomerativeClustering(
+    metric='precomputed',
+    n_clusters=None,
+    distance_threshold = k, #Wilt dat elke cluster een afstand van 7 met elkaar heeft
+    linkage='complete'
+    ).fit(simMat)
+    print(model.labels_)
+    print(f" Number of clusters: {model.n_clusters_}")
+
+
 def main():
 
     parser = argparse.ArgumentParser()
@@ -69,16 +80,8 @@ def main():
     simMat = simMatrix(output,args.goal)
     for i in simMat:
         print(i)
-
     #Clustering
-    model = AgglomerativeClustering(
-    metric='precomputed',
-    n_clusters=None,
-    distance_threshold = args.k, #Wilt dat elke cluster een afstand van 7 met elkaar heeft
-    linkage='complete'
-    ).fit(simMat)
-    print(model.labels_)
-    print(f" Number of clusters: {model.n_clusters_}")
+    clustering(simMat,args.k)
 
     #Totale afstand is dus k = distance_treshold * #clusters
 

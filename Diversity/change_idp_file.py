@@ -1,6 +1,7 @@
 # Programma dat zoekt naar n oplossingen die een totale afstand hebben van k
 # Dus k is de som van d(sx,sy) voor sx,sy deel van de oplossingen verzameling
 
+from sklearn.cluster import AgglomerativeClustering
 from idp_engine import IDP
 import contextlib
 import io, re, os
@@ -197,3 +198,41 @@ def collectBaseSol(output:str,relevant:str,isBool:int):
     partsol = partsol[:-2]+ '}.' if isBool == 0 else  partsol[:-2]+'.'
 
     return n,partsol
+
+def simMatrix(output,goal):
+
+    qpos = []
+    pattern = re.escape(goal) + r' := {(.*)}'
+    for line in output.split("\n"):
+        match = re.match(pattern,line)
+        if match:
+            try:
+                queens = eval("[" + match.group(1) + "]")
+            # else: queens = "[" + match.group(1) + "]"
+            except:
+                queens = re.findall( r'->\s*(\w+)', match.group(1))
+                # print(queens)
+                # print(len(queens))
+                # exit()
+            qpos.append(queens)
+    # print(qpos)
+
+    simMat = [[0 for _ in range(len(qpos))] for _ in range(len(qpos))]
+    for i in range(len(qpos)):
+        for j in range(len(qpos)):
+            # distance = len(set(qpos[j]) - set(qpos[i]))
+            distance = sum(x != y for x, y in zip(qpos[i], qpos[j]))
+            simMat[i][j] = distance
+            # print(f"simMat[{i}][{j}] = {simMat[i][j]}")
+    
+    return simMat
+
+def clustering(simMat,k):
+    model = AgglomerativeClustering(
+    metric='precomputed',
+    n_clusters=None,
+    distance_threshold = k, #Wilt dat elke cluster een afstand van 7 met elkaar heeft
+    linkage='complete'
+    ).fit(simMat)
+    print(model.labels_)
+    print(f" Number of clusters: {model.n_clusters_}")

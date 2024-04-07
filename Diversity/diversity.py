@@ -3,7 +3,7 @@ from idp_engine.Parse import TheoryBlock, Structure
 from idp_engine.Run import model_expand
 from typing import Union, Iterator
 import argparse, time
-from change_idp_file import runCode, readCode, insertCode, printCode, checkPredFunc, collectSol, collectBaseSol
+from change_idp_file import runCode, readCode, insertCode, printCode, checkPredFunc, collectSol, collectBaseSol, simMatrix, clustering
 class idp(IDP):
     # -> is a function annotation to document the return value for a function
     # code:str means that code is expected to be a string
@@ -36,7 +36,14 @@ class idp(IDP):
         lines = [line for line in lines if '//' not in line]
         # printCode(lines)
         if method == "Clustering":
-            return
+            foCode = readCode(input)
+            output = runCode(foCode)
+            # print(output)
+            simMat = simMatrix(output,relevant)
+            for i in simMat:
+                print(i)
+            #Clustering
+            clustering(simMat,k)
         if method == "Offline":
             output = runCode(lines)
             # print(output)
