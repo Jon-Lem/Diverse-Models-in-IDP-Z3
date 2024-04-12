@@ -42,8 +42,6 @@ def runCode(lines):
 
 # Haal de belangrijkste 
 def dist_expr(relation:str,goal:str) -> str:
-    # relation = " Index * Index -> Bool"
-    # goal = "queen"
     relation = relation.split("->")[0].strip()
     relation = relation.split("*")
     relation= [i.strip() for i in relation]
@@ -54,8 +52,7 @@ def dist_expr(relation:str,goal:str) -> str:
         element = ','.join([f"{word}__{i}" for i in range(count)])
         dist_theory += f"{element} in {word}: {goal}(solution__x,{element}) ~= {goal}(solution__y,{element})" 
     dist_theory += "}/2."
-    # print(dist_theory)
-    # print(element)
+
     return dist_theory
 
 def insertCode(lines:list,n:int,k:int,goal:str,partSol=None,isBool=None,method=None):
@@ -87,6 +84,7 @@ def insertCode(lines:list,n:int,k:int,goal:str,partSol=None,isBool=None,method=N
         target = "k() ="
         index = indexsearch(lines,target)
         lines[index] = k_theory
+
         return
 
     k_voc = "k: () -> Int\n"
@@ -236,3 +234,5 @@ def clustering(simMat,k):
     ).fit(simMat)
     print(model.labels_)
     print(f" Number of clusters: {model.n_clusters_}")
+    
+    return

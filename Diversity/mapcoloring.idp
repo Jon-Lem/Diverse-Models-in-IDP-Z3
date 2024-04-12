@@ -21,8 +21,8 @@ structure {
 }
 
 procedure main() {
-    print(model_check(T, S))  
-    pretty_print(model_expand(T, S, max=50))
+    //print(model_check(T, S))  
+    pretty_print(model_expand(T, S, max=50, timeout_seconds=0))
 
 
 }
