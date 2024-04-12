@@ -89,9 +89,8 @@ def main():
     parser.add_argument('input',type=str,help="Input IDP file")
     parser.add_argument('-n','--n',type=int,help="number of solutions")
     parser.add_argument('-k','--k',type=int,help="total distance k")
-    parser.add_argument('goal',nargs='*', type=str ,help="target of the diversity")
-    # parser.add_argument('-l','--list', action='append', help='<Required> Set flag', required=True)
     parser.add_argument('method',type=str,help="Method of calculating diversity, choice between: Offline, Online1, Online2, Clustering")
+    parser.add_argument('goal',nargs='*', type=str ,help="target of the diversity")
     args = parser.parse_args()
 
     input = args.input

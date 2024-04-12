@@ -42,16 +42,23 @@ def runCode(lines):
 
 # Haal de belangrijkste 
 def dist_expr(relation:str,goal:str) -> str:
+    # print(relation)
     relation = relation.split("->")[0].strip()
+    # print(relation)    
     relation = relation.split("*")
     relation= [i.strip() for i in relation]
     relation = [(x,relation.count(x)) for x in set(relation)]
     # print(relation)
-    dist_theory = "!solution__x,solution__y in solution: distance(solution__x,solution__y) = #{"   
+    # dist_theory = "!solution__x,solution__y in solution: distance(solution__x,solution__y) = #{"   
+    dist_theory = ''
+    # cardinal = []
     for word,count in relation:
         element = ','.join([f"{word}__{i}" for i in range(count)])
-        dist_theory += f"{element} in {word}: {goal}(solution__x,{element}) ~= {goal}(solution__y,{element})" 
-    dist_theory += "}/2."
+        # dist_theory += f"{element} in {word}: {goal}(solution__x,{element}) ~= {goal}(solution__y,{element})" 
+        # cardinal.append(f"#{{{element} in {word}: {goal}(solution__x,{element}) ~= {goal}(solution__y,{element})}}")
+        dist_theory += f"#{{{element} in {word}: {goal}(solution__x,{element}) ~= {goal}(solution__y,{element})}}"
+    # dist_theory += "}/2."
+    # dist_theory += "+".join(cardinal)
 
     return dist_theory
 
@@ -69,6 +76,7 @@ def insertCode(lines:list,n:int,k:int,goal:str,partSol=None,isBool=None,method=N
         index = indexsearch(lines,target)
         lines[index] = type_sol
         # Update partial solutions
+        # Lijst van goals!!!!
         if(indexsearch(lines,goal[:len(goal)//2]) != -1):
             index = indexsearch(lines,goal[:len(goal)//2])
             lines[index] = goal
@@ -93,15 +101,20 @@ def insertCode(lines:list,n:int,k:int,goal:str,partSol=None,isBool=None,method=N
     end = "\n"
 
     # Update predicate/function
-    target=f"{goal}"
-    index = indexsearch(lines,target)
-    if(index == -1):
-        print("Error: couldn't be found")
-        exit()
-    # print(lines[index])
-    dist_theory = dist_expr(lines[index].split(':')[1],goal)
-    lines[index] = lines[index].split(':')[0] + ": solution *" + lines[index].split(':')[1]
-    
+    dist_theory = "!solution__x,solution__y in solution: distance(solution__x,solution__y) = "   
+    cardinal = []
+    for func in goal:
+        target=f"{func}"
+        index = indexsearch(lines,target)
+        if(index == -1):
+            print(f"Error: desired function '{func}' couldn't be found")
+            exit()
+        # print(lines[index])
+        cardinal.append(dist_expr(lines[index].split(':')[1],func))
+        lines[index] = lines[index].split(':')[0] + ": solution *" + lines[index].split(':')[1]
+    dist_theory += "+".join(cardinal) + '.'
+    # print(dist_theory)
+
     lines.insert(index,type_sol)
     lines.insert(index+2,k_voc)
     lines.insert(index+2,dist_voc +end)
