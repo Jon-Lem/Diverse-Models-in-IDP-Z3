@@ -12,7 +12,7 @@ theory T:V {
  //!x in country: ColourOf(x) = Yellow.
  //!x in country: Bordering(Germany,x) <=> (ColourOf(x) = Green).
  //!x in country: ~Bordering(Switzerland,x) <=> (ColourOf(x) = Yellow).
- //!x,y in country: Bordering(x,y) =>  (ColourOf(x) ~=  ColourOf(y)).  
+ !x,y in country: Bordering(x,y) =>  ColourOf(x) ~=  ColourOf(y).  
 
 }
 
@@ -23,6 +23,5 @@ structure {
 procedure main() {
     //print(model_check(T, S))  
     pretty_print(model_expand(T, S, max=50, timeout_seconds=0))
-
 
 }

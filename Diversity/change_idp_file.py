@@ -49,20 +49,14 @@ def dist_expr(relation:str,goal:str) -> str:
     relation= [i.strip() for i in relation]
     relation = [(x,relation.count(x)) for x in set(relation)]
     # print(relation)
-    # dist_theory = "!solution__x,solution__y in solution: distance(solution__x,solution__y) = #{"   
     dist_theory = ''
-    # cardinal = []
     for word,count in relation:
         element = ','.join([f"{word}__{i}" for i in range(count)])
-        # dist_theory += f"{element} in {word}: {goal}(solution__x,{element}) ~= {goal}(solution__y,{element})" 
-        # cardinal.append(f"#{{{element} in {word}: {goal}(solution__x,{element}) ~= {goal}(solution__y,{element})}}")
         dist_theory += f"#{{{element} in {word}: {goal}(solution__x,{element}) ~= {goal}(solution__y,{element})}}"
-    # dist_theory += "}/2."
-    # dist_theory += "+".join(cardinal)
 
     return dist_theory
 
-def insertCode(lines:list,n:int,k:int,goal:str,partSol=None,isBool=None,method=None):
+def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=None):
 
     type_sol = "type solution := {"
     for i in range(1,n):
@@ -114,7 +108,7 @@ def insertCode(lines:list,n:int,k:int,goal:str,partSol=None,isBool=None,method=N
         lines[index] = lines[index].split(':')[0] + ": solution *" + lines[index].split(':')[1]
     dist_theory += "+".join(cardinal) + '.'
     # print(dist_theory)
-
+    
     lines.insert(index,type_sol)
     lines.insert(index+2,k_voc)
     lines.insert(index+2,dist_voc +end)
@@ -122,20 +116,29 @@ def insertCode(lines:list,n:int,k:int,goal:str,partSol=None,isBool=None,method=N
     target="theory"
     index = indexsearch(lines,target)
     # print(index)
+    end_theory = indexsearch(lines[index:],"}") + index
+    # print(end_theory)
+
+    # Lijst van goals!!!!
+    for func in goal:
     # Update existing theory with solution type
-    goal_theory_idx = [i for i in range(len(lines)) if goal in lines[i] and i > index]
-    # print(goal_theory_idx)
-    pattern = r'\b' + re.escape(goal) + r'\s*\((.*?)\)'
-    for i in goal_theory_idx:
-        lines[i] = re.sub(pattern, re.escape(goal) + r'(solution__0, \1)', lines[i])
-        lines[i] = "!solution__0 in solution:" + lines[i]
-        index = i
-        # print(lines[i])
+        # print(func)
+        func_theory_idx = [i for i in range(len(lines)) if func in lines[i] and i >= index  and i < end_theory]
+        # print(func_theory_idx)
+        pattern = r'\b' + re.escape(func) + r'\s*\((.*?)\)'
+        for i in func_theory_idx:
+            lines[i] = re.sub(pattern, re.escape(func) + r'(solution__0, \1)', lines[i])
+            if(func == goal[0]):
+                lines[i] = "!solution__0 in solution:" + lines[i]
+            index = i
+            # print(lines[i])
     # Add parts to theory
+    # printCode(lines)
     lines.insert(index+1,k_theory)
     lines.insert(index+1,k_dist_theory + end)
     lines.insert(index+1,dist_theory + end)
-    
+    # printCode(lines)
+
     if(isBool != None and method == "Offline"):
         if(isBool):
             target="theory"
