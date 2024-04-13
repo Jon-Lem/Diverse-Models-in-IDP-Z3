@@ -102,6 +102,8 @@ def main():
 
     if not idp.check_method(method):
         print("Given method does not exist")
+    elif goal == None:
+        print("All functions are relevant")
     else:
         idp.diverse_model_generation(input,n,k,goal,method)
 

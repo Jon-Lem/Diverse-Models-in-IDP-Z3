@@ -29,7 +29,6 @@ def readCode(input:str) -> Iterator[str]:
     return lines
 
 def runCode(lines):
-
     code = "".join(lines)
     kb = IDP.from_str(code)
     f = io.StringIO()
@@ -52,7 +51,10 @@ def dist_expr(relation:str,goal:str) -> str:
     dist_theory = ''
     for word,count in relation:
         element = ','.join([f"{word}__{i}" for i in range(count)])
-        dist_theory += f"#{{{element} in {word}: {goal}(solution__x,{element}) ~= {goal}(solution__y,{element})}}"
+        if count > 1:
+            dist_theory += f"#{{{element} in {word}: {goal}(solution__x,{element}) ~= {goal}(solution__y,{element})}}/{count}"
+        else:
+            dist_theory += f"#{{{element} in {word}: {goal}(solution__x,{element}) ~= {goal}(solution__y,{element})}}"
 
     return dist_theory
 
@@ -112,12 +114,10 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
     lines.insert(index,type_sol)
     lines.insert(index+2,k_voc)
     lines.insert(index+2,dist_voc +end)
-    # printCode(lines)
+
     target="theory"
     index = indexsearch(lines,target)
-    # print(index)
     end_theory = indexsearch(lines[index:],"}") + index
-    # print(end_theory)
 
     # Lijst van goals!!!!
     for func in goal:
@@ -131,13 +131,28 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
             if(func == goal[0]):
                 lines[i] = "!solution__0 in solution:" + lines[i]
             index = i
-            # print(lines[i])
-    # Add parts to theory
-    # printCode(lines)
+
     lines.insert(index+1,k_theory)
     lines.insert(index+1,k_dist_theory + end)
     lines.insert(index+1,dist_theory + end)
-    # printCode(lines)
+
+    for func in goal:
+        target = "structure"
+        begin_struct = indexsearch(lines,target)
+        end_struct = indexsearch(lines[begin_struct:],"}") + begin_struct
+        index = indexsearch(lines[begin_struct:end_struct],func)
+        if index == -1:
+            continue
+        else: index += begin_struct
+        tuples_pattern = re.compile(r'\((.*?)\)')
+        tuples = tuples_pattern.findall(lines[index])
+        # print(tuples)
+        formatted_tuples = []
+        for i in range(1,n+1):
+            formatted_tuples += [f"(s{i},{t})" for t in tuples]
+        # print(formatted_tuples)
+        func_struct = ",".join(formatted_tuples)
+        lines[index] = f"{func} := {{" + func_struct + "}."
 
     if(isBool != None and method == "Offline"):
         if(isBool):
