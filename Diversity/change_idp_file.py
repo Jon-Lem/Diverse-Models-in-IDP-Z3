@@ -5,8 +5,7 @@ from sklearn.cluster import AgglomerativeClustering
 from idp_engine import IDP
 import contextlib
 import io, re, os
-import argparse
-import time
+import numpy as np
 from typing import Iterator
 
 def printCode(lines:list) -> None:
@@ -301,41 +300,49 @@ def collectBaseSol(lines:list,output:str,relevant:list,isBool:list) -> tuple[int
     return n,partSol
 
 def simMatrix(output,goal):
-
-    qpos = []
-    pattern = re.escape(goal) + r' := {(.*)}'
-    for line in output.split("\n"):
-        match = re.match(pattern,line)
-        if match:
-            try:
-                queens = eval("[" + match.group(1) + "]")
-            # else: queens = "[" + match.group(1) + "]"
-            except:
-                queens = re.findall( r'->\s*(\w+)', match.group(1))
-                # print(queens)
-                # print(len(queens))
-                # exit()
-            qpos.append(queens)
-    # print(qpos)
-
-    simMat = [[0 for _ in range(len(qpos))] for _ in range(len(qpos))]
-    for i in range(len(qpos)):
-        for j in range(len(qpos)):
-            # distance = len(set(qpos[j]) - set(qpos[i]))
-            distance = sum(x != y for x, y in zip(qpos[i], qpos[j]))
-            simMat[i][j] = distance
-            # print(f"simMat[{i}][{j}] = {simMat[i][j]}")
+    for k in range(len(goal)):
+        qpos = []
+        pattern = re.escape(goal[k]) + r' := {(.*)}'
+        for line in output.split("\n"):
+            match = re.match(pattern,line)
+            if match:
+                try: # If predicate
+                    queens = eval("[" + match.group(1) + "]")
+                except: # If function
+                    queens = re.findall( r'->\s*(\w+)', match.group(1))
+                    # print(queens)
+                    # print(len(queens))
+                    # exit()
+                qpos.append(queens)
+        # print(qpos)
+        if k==0:
+            simMat = [[0 for _ in range(len(qpos))] for _ in range(len(qpos))]
+        for i in range(len(qpos)):
+            for j in range(len(qpos)):
+                # distance = len(set(qpos[j]) - set(qpos[i]))
+                distance = sum(x != y for x, y in zip(qpos[i], qpos[j]))
+                if k==0:
+                    simMat[i][j] = distance
+                else:
+                    simMat[i][j] += distance
+                # print(f"simMat[{i}][{j}] = {simMat[i][j]}")
     
     return simMat
 
-def clustering(simMat,k):
+def clustering(simMat,k,n):
     model = AgglomerativeClustering(
     metric='precomputed',
     n_clusters=None,
-    distance_threshold = k, #Wilt dat elke cluster een afstand van 7 met elkaar heeft
+    distance_threshold = k//n, #Wilt dat elke cluster een afstand van 7 met elkaar heeft
     linkage='complete'
     ).fit(simMat)
-    print(model.labels_)
-    print(f" Number of clusters: {model.n_clusters_}")
-    
+    # print(model.labels_)
+    # print(len(model.labels_))
+    # print(f" Number of clusters: {model.n_clusters_}")
+    if(model.n_clusters_ == 1):
+        print('Solution is not satisfiable')
+        exit()
+    solutions = np.random.choice(model.labels_.size, n, replace=False)
+    solutions = [f's{i}' for i in solutions]
+    print(solutions)
     return

@@ -7,26 +7,8 @@ from change_idp_file import runCode, readCode, insertCode, printCode, checkPredF
 
 relevant = ''
 
-class idp(IDP):
-    # -> is a function annotation to document the return value for a function
-    # code:str means that code is expected to be a string
-    # cls means that the method is a class method
-    # Union defines that the variable van hold values of different types
-    def from_str(cls, code:str) -> "IDP":
-        IDP.from_str(cls, code)
-
-    # Iterator is an object
-    def model_expand(*theories: Union[TheoryBlock, Structure, Theory],
-                 max: int = 10,
-                 timeout_seconds: int = 10,
-                 complete: bool = False,
-                 extended: bool = False,
-                 sort: bool = False
-                 ) -> Iterator[str]:
-        model_expand(theories,max,timeout_seconds,complete,extended,sort)
-    
+class idp(IDP):    
     def check_method(method:str) -> bool:
-
         valid_methods = ["Offline", "Online1", "Online2", "Clustering"]
         if method in valid_methods:
             return True
@@ -52,10 +34,10 @@ class idp(IDP):
             output = runCode(foCode)
             # print(output)
             simMat = simMatrix(output,relevant)
-            for i in simMat:
-                print(i)
+            # for i in simMat:
+            #     print(i)
             #Clustering
-            clustering(simMat,k)
+            clustering(simMat,k,n)
         if method == "Offline":
             output = runCode(lines)
             # print(output)
@@ -97,9 +79,6 @@ class idp(IDP):
                     partSol = collectSol(output,relevant,isBool)                  
                 # Update code with new solutions
             
-
-
-
 def main():
     
     parser = argparse.ArgumentParser()
@@ -115,13 +94,12 @@ def main():
     k = args.k  
     goal = args.goal 
     method = args.method 
-    print(f"arguments: {input} {n} {k} {goal} {method}")   
+    # print(f"arguments: {input} {n} {k} {goal} {method}")   
     # result = idp.check_args(input,method,goal)
     result = idp.check_args(input,method,goal)
     if result:
         goal = result
-    print(f"arguments: {input} {n} {k} {goal} {method}") 
-    exit()   
+    # print(f"arguments: {input} {n} {k} {goal} {method}") 
     idp.diverse_model_generation(input,n,k,goal,method)
 
 if __name__ == "__main__":
