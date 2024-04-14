@@ -3,7 +3,7 @@ from idp_engine.Parse import TheoryBlock, Structure
 from idp_engine.Run import model_expand
 from typing import Union, Iterator
 import argparse, time
-from change_idp_file import runCode, readCode, insertCode, printCode, checkPredFunc, collectSol, collectBaseSol, simMatrix, clustering
+from change_idp_file import runCode, readCode, insertCode, printCode, checkPredFunc, collectSol, collectBaseSol, simMatrix, clustering, checkFunc
 class idp(IDP):
     # -> is a function annotation to document the return value for a function
     # code:str means that code is expected to be a string
@@ -35,6 +35,7 @@ class idp(IDP):
         # Delete comments 
         lines = [line for line in lines if '//' not in line]
         # printCode(lines)
+        checkFunc(lines,relevant)
         if method == "Clustering":
             foCode = readCode(input)
             output = runCode(foCode)
@@ -48,17 +49,16 @@ class idp(IDP):
             output = runCode(lines)
             # print(output)
             isBool = checkPredFunc(lines,relevant)
-            n,partSol = collectBaseSol(output,relevant,isBool)
+            n,partSol = collectBaseSol(lines,output,relevant,isBool)
             insertCode(lines,n,k,relevant,partSol,isBool,method)
             # print(partsol)
-            # printCode(lines)
+            printCode(lines)
             output = runCode(lines)
             print(output)
         if method == "Online1":
             insertCode(lines,n,k,relevant)
             printCode(lines)
             output = runCode(lines)
-            print(output)
         if method == "Online2":
             k_orig = k
             for i in range(1,n+1):
@@ -66,19 +66,24 @@ class idp(IDP):
                     k=0
                     isBool = checkPredFunc(lines,relevant)
                     insertCode(lines,i,k,relevant)
+                    # printCode(lines)
                     # print(isBool)
                 elif i == 2:
                     k=k_orig//n
-                    insertCode(lines,i,k,partSol,isBool)
+                    insertCode(lines,i,k,relevant,partSol,isBool,method)
+                    # printCode(lines)
                 else:
                     k=i*k_orig//n
-                    insertCode(lines,i,k,partSol,isBool)
-                
+                    insertCode(lines,i,k,relevant,partSol,isBool,method)
+                # print('==============')
+                # print(i)
+                print('===LINES===')
                 printCode(lines)
                 output = runCode(lines)
                 print(output)
                 # Collect solutions
-                partSol = collectSol(output,relevant,isBool)
+                if(i != n):
+                    partSol = collectSol(output,relevant,isBool)                  
                 # Update code with new solutions
             
 

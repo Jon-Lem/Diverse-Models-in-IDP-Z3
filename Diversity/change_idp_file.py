@@ -9,7 +9,7 @@ import argparse
 import time
 from typing import Iterator
 
-def printCode(lines):
+def printCode(lines:list) -> None:
     [print(i) for i in lines]
     return
 
@@ -18,6 +18,20 @@ def indexsearch(lines:list,target:str) -> int:
         if line.strip().startswith(target):
             return index
     return -1
+
+def checkFunc(lines:list,relevant:list) -> None:
+    target = "vocabulary"
+    begin_voc = indexsearch(lines,target)
+    end_voc = indexsearch(lines[begin_voc:],"}") + begin_voc
+    for i in range(len(relevant)):
+        count = 0
+        pattern = r'\b' + re.escape(relevant[i]) + r'\b'
+        for line in lines[begin_voc:end_voc]:
+            if re.search(pattern, line):
+                count+=1
+        if count == 0:
+            print(f"Error: function '{relevant[i]}' could not be found")
+            exit()
 
 def readCode(input:str) -> Iterator[str]:
     lines = []
@@ -59,31 +73,58 @@ def dist_expr(relation:str,goal:str) -> str:
     return dist_theory
 
 def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=None):
-
     type_sol = "type solution := {"
     for i in range(1,n):
         type_sol += f"s{i},"
     type_sol+=f"s{n}" + "}\n"
     k_theory = f"k() = {k}.\n"
 
-    if(isBool != None and method == None):
+    if(isBool != None and method == "Online2"):
         # Update type solution
+        # print(f'============LINES============\n {lines}')
         target="type solution"
         index = indexsearch(lines,target)
         lines[index] = type_sol
         # Update partial solutions
         # Lijst van goals!!!!
-        if(indexsearch(lines,goal[:len(goal)//2]) != -1):
-            index = indexsearch(lines,goal[:len(goal)//2])
-            lines[index] = goal
-        elif(isBool):
-            target="theory"
-            index = indexsearch(lines,target)+1
-            lines.insert(index,goal)
-        else:
-            target="structure"
-            index = indexsearch(lines,target)+1 
-            lines.insert(index,goal)
+        for i in range(len(partSol)):
+            target = "structure"
+            begin_struct = indexsearch(lines,target)
+            end_struct = indexsearch(lines[begin_struct:],"}") + begin_struct
+            # print(lines[begin_struct:end_struct])
+            # print(goal[i])
+            index = indexsearch(lines[begin_struct:end_struct],f'{goal[i]} :=')
+            if index != -1:
+                index += begin_struct
+                tuples_pattern = re.compile(r'\((.*?)\)')
+                tuples = tuples_pattern.findall(lines[index])
+                # print(tuples)
+                formatted_tuples = []
+                if lines[index].strip().startswith(f"{goal[i]} := {{(s"):
+                    for j in range(1,n+1):
+                        formatted_tuples += [f"(s{j},{t.split(',',1)[1]})" for t in tuples]
+                    func_struct = ",".join(formatted_tuples)
+                    lines[index] = f"{goal[i]} := {{" + func_struct + "}."
+                    continue
+                else:
+                    # for j in range(1,n+1):
+                    #     formatted_tuples += [f"(s{j},{t})" for t in tuples]
+                    # print(formatted_tuples)
+                
+                    continue
+            # print(f'====partSol====\n {partSol}')
+            if(indexsearch(lines,partSol[i][:len(partSol[i])//2]) != -1):
+                index = indexsearch(lines,partSol[i][:len(partSol[i])//2])
+                lines[index] = partSol[i]
+                # print(f'============NEW_LINES============\n {lines}')
+            elif(isBool[i]):
+                target="theory"
+                index = indexsearch(lines,target)+1
+                lines.insert(index,partSol[i])
+            else:
+                target="structure"
+                index = indexsearch(lines,target)+1 
+                lines.insert(index,partSol[i])
         # Update k
         target = "k() ="
         index = indexsearch(lines,target)
@@ -102,10 +143,6 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
     for func in goal:
         target=f"{func}"
         index = indexsearch(lines,target)
-        if(index == -1):
-            print(f"Error: desired function '{func}' couldn't be found")
-            exit()
-        # print(lines[index])
         cardinal.append(dist_expr(lines[index].split(':')[1],func))
         lines[index] = lines[index].split(':')[0] + ": solution *" + lines[index].split(':')[1]
     dist_theory += "+".join(cardinal) + '.'
@@ -119,7 +156,6 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
     index = indexsearch(lines,target)
     end_theory = indexsearch(lines[index:],"}") + index
 
-    # Lijst van goals!!!!
     for func in goal:
     # Update existing theory with solution type
         # print(func)
@@ -136,6 +172,7 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
     lines.insert(index+1,k_dist_theory + end)
     lines.insert(index+1,dist_theory + end)
 
+    # Update the structure, if relevant functions present
     for func in goal:
         target = "structure"
         begin_struct = indexsearch(lines,target)
@@ -155,78 +192,101 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
         lines[index] = f"{func} := {{" + func_struct + "}."
 
     if(isBool != None and method == "Offline"):
-        if(isBool):
-            target="theory"
-            index = indexsearch(lines,target)+1
-        else:
-            target="structure"
-            index = indexsearch(lines,target)+1
-        lines.insert(index,partSol)
+        for i in range(len(isBool)):
+            if(isBool[i]):
+                target="theory"
+                index = indexsearch(lines,target)+1
+            else:
+                target="structure"
+                index = indexsearch(lines,target)+1
+            lines.insert(index,partSol[i])
 
     return 
 
-def checkPredFunc(lines:list,relevant:str) -> int:
-
-    index = indexsearch(lines,relevant)
-    range = lines[index].split("->")[1].strip()
-    if(range == "Bool"):
-        isBool = 1
-    else:
-        isBool = 0
+def checkPredFunc(lines:list,relevant:list) -> Iterator[int]:
+    isBool = []
+    for rel in relevant: 
+        index = indexsearch(lines,rel)
+        # print(lines[index])
+        range = lines[index].split("->")[1].strip()
+        if(range == "Bool"):
+            isBool.append(1)
+        else:
+            isBool.append(0)
 
     return isBool
 
-def collectSol(output:str,relevant:str,isBool:int): # Neem altijd de eerste oplossing
-    for line in output.split("\n"):
-        index = line.find(relevant)
+def collectSol(output:str,relevant:list,isBool:list): # Neem altijd de eerste oplossing
+    partSol = []
+    for i in range(len(relevant)):
+        # print(f'rel: {relevant[i]}')
+        # print('===OUTPUT===')
+        # print(output)
+        for line in output.split("\n"):
+            index = line.find(relevant[i])
+            if index != -1:
+                break
+        # print(f"===LINE===\n {line}")
+        # print(f'===INDEX===\n {index}')
+        if isBool[i] == 1:
+            tuples_pattern = re.compile(r'\((.*?)\)')
+            tuples = tuples_pattern.findall(line)
+            # print(tuples)
+            formatted_tuples = [f"{relevant[i]}({t})" for t in tuples]
+            # print(f'formatted_tuples: {formatted_tuples}')
+            partsol = " & ".join(formatted_tuples)
+            partsol = partsol + "."
+            # print(partsol)    
+        else:
+            # print(relevant[i])
+            # print(line)
+            partsol = f'{relevant[i]} >> ' + line.split(":=")[1]
+        partSol.append(partsol)
+    # print(f'partSol:\n {partSol}')
+    if partSol[i].strip() == '.':
+        print("Error: cannot satisfy given parameters. Change 'n' or 'k' .")
+        exit()
+    return partSol
+
+def collectBaseSol(lines:list,output:str,relevant:list,isBool:list) -> tuple[int,Iterator[str]]:
+    partSol = []
+    for i in range(len(relevant)):
+        # Als het al in de struct staat moet je niets doen
+        target = "structure"
+        begin_struct = indexsearch(lines,target)
+        end_struct = indexsearch(lines[begin_struct:],"}") + begin_struct
+        index = indexsearch(lines[begin_struct:end_struct],relevant[i])
         if index != -1:
-            break
-    # print(index)
-    # print(line)
-
-    if isBool == 1:
-        tuples_pattern = re.compile(r'\((.*?)\)')
-        tuples = tuples_pattern.findall(line)
-        # print(tuples)
-        formatted_tuples = [f"{relevant}({t})" for t in tuples]
-        # print(formatted_tuples)
-        partsol = " & ".join(formatted_tuples)
-        partsol = partsol + "."
-        # print(partsol)    
-    else:
-        partsol = f'{relevant} >> ' + line.split(":=")[1]
-
-    return partsol
-
-def collectBaseSol(output:str,relevant:str,isBool:int):
-    n = 0
-    partsol = f'{relevant} >> {{' if isBool == 0 else ''
-    for line in output.split('\n'):
-        target = "Model"
-        if line.strip().startswith(target):
-            n+=1
+            partSol.append("\n")
             continue
-        target = f"{relevant}"
-        if line.strip().startswith(target):      
-            if isBool == 1:
-                tuples_pattern = re.compile(r'\((.*?)\)')
-                tuples = tuples_pattern.findall(line)
-                # print(line)
-                # print(tuples)
-                formatted_tuples = [f"{relevant}(s{n}, {t})" for t in tuples]
-                # print(formatted_tuples)
-                part_sol = " & ".join(formatted_tuples)
-                partsol += part_sol + " & "
-                # print(partsol)    
-            else:
-                result_pattern = r"(\b\w+(?:,\w+)?)\s*->\s*(\w+)"
-                match = re.findall(result_pattern,line)
-                formatted_tuples = [f"(s{n},{domain}) -> {range}" for domain,range in match]
-                part_sol = ", ".join(formatted_tuples)
-                partsol += part_sol + " , "
-    partsol = partsol[:-2]+ '}.' if isBool == 0 else  partsol[:-2]+'.'
-
-    return n,partsol
+        n = 0
+        partsol = f'{relevant[i]} >> {{' if isBool[i] == 0 else ''
+        for line in output.split('\n'):
+            target = "Model"
+            if line.strip().startswith(target):
+                n+=1
+                continue
+            target = f"{relevant[i]}"
+            if line.strip().startswith(target):      
+                if isBool[i] == 1:
+                    tuples_pattern = re.compile(r'\((.*?)\)')
+                    tuples = tuples_pattern.findall(line)
+                    # print(line)
+                    # print(tuples)
+                    formatted_tuples = [f"{relevant[i]}(s{n}, {t})" for t in tuples]
+                    # print(formatted_tuples)
+                    part_sol = " & ".join(formatted_tuples)
+                    partsol += part_sol + " & "
+                    # print(partsol)    
+                else:
+                    result_pattern = r"(\b\w+(?:,\w+)?)\s*->\s*(\w+)"
+                    match = re.findall(result_pattern,line)
+                    formatted_tuples = [f"(s{n},{domain}) -> {range}" for domain,range in match]
+                    part_sol = ", ".join(formatted_tuples)
+                    partsol += part_sol + " , "
+        partsol = partsol[:-2]+ '}.' if isBool[i] == 0 else  partsol[:-2]+'.'
+        partSol.append(partsol)
+    return n,partSol
 
 def simMatrix(output,goal):
 
