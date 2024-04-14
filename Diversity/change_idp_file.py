@@ -19,6 +19,18 @@ def indexsearch(lines:list,target:str) -> int:
             return index
     return -1
 
+def completeFunc(lines,relevant:list) -> Iterator[str]:
+    target = "vocabulary"
+    begin_voc = indexsearch(lines,target)
+    end_voc = indexsearch(lines[begin_voc:],"}") + begin_voc    
+    voc_lines = lines[begin_voc:end_voc]
+    # print(voc_lines)
+    pattern = r'^\s*(\w+)\s*:\s*\w'
+    relevant= [re.match(pattern, line).group(1) for line in voc_lines if re.match(pattern, line)]
+    # print(relevant)
+    return relevant
+
+
 def checkFunc(lines:list,relevant:list) -> None:
     target = "vocabulary"
     begin_voc = indexsearch(lines,target)

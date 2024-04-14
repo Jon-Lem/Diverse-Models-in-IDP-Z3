@@ -3,7 +3,10 @@ from idp_engine.Parse import TheoryBlock, Structure
 from idp_engine.Run import model_expand
 from typing import Union, Iterator
 import argparse, time
-from change_idp_file import runCode, readCode, insertCode, printCode, checkPredFunc, collectSol, collectBaseSol, simMatrix, clustering, checkFunc
+from change_idp_file import runCode, readCode, insertCode, printCode, checkPredFunc, collectSol, collectBaseSol, simMatrix, clustering, checkFunc, completeFunc
+
+relevant = ''
+
 class idp(IDP):
     # -> is a function annotation to document the return value for a function
     # code:str means that code is expected to be a string
@@ -30,12 +33,20 @@ class idp(IDP):
         else:
             return False
 
+    def check_args(input:str,method:str,goal:list) -> None | list:
+        if not idp.check_method(method):
+            print("Error: Given method does not exist")
+            exit()
+        elif not goal:
+            lines = readCode(input)
+            goal = completeFunc(lines,goal)
+            return goal
+
     def diverse_model_generation(input:str,n:int,k:int,relevant:list,method:str):
         lines = readCode(input)   
         # Delete comments 
         lines = [line for line in lines if '//' not in line]
         # printCode(lines)
-        checkFunc(lines,relevant)
         if method == "Clustering":
             foCode = readCode(input)
             output = runCode(foCode)
@@ -88,6 +99,7 @@ class idp(IDP):
             
 
 
+
 def main():
     
     parser = argparse.ArgumentParser()
@@ -95,7 +107,7 @@ def main():
     parser.add_argument('-n','--n',type=int,help="number of solutions")
     parser.add_argument('-k','--k',type=int,help="total distance k")
     parser.add_argument('method',type=str,help="Method of calculating diversity, choice between: Offline, Online1, Online2, Clustering")
-    parser.add_argument('goal',nargs='*', type=str ,help="target of the diversity")
+    parser.add_argument('goal',nargs='*', type=str ,help="target of the diversity")    
     args = parser.parse_args()
 
     input = args.input
@@ -103,14 +115,14 @@ def main():
     k = args.k  
     goal = args.goal 
     method = args.method 
-    # print(f"arguments: {input} {n} {k} {goal} {method}")   
-
-    if not idp.check_method(method):
-        print("Given method does not exist")
-    elif goal == None:
-        print("All functions are relevant")
-    else:
-        idp.diverse_model_generation(input,n,k,goal,method)
+    print(f"arguments: {input} {n} {k} {goal} {method}")   
+    # result = idp.check_args(input,method,goal)
+    result = idp.check_args(input,method,goal)
+    if result:
+        goal = result
+    print(f"arguments: {input} {n} {k} {goal} {method}") 
+    exit()   
+    idp.diverse_model_generation(input,n,k,goal,method)
 
 if __name__ == "__main__":
     start_time = time.time()
