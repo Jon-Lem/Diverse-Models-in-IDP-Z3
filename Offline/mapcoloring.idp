@@ -38,9 +38,14 @@ theory T:V {
 
 n() = 4.
 {
-!x in solution: cluster(x) <- #{y in solution: distance(x,y) = 4} = 5.
-!x,y,z in solution: buddy(x,y) <- distance(x,y) = 4.
+!x in solution: cluster(x) <- #{y in solution: distance(x,y) = 2 } = 3 .
+!x in solution: cluster(x) <- !y in solution: distance(x,y) = 2 & cluster(y).
+//!x,y in solution: cluster(x) <- distance(x,y)=2 & ~cluster(y).
+//!x in solution: cluster(x) <- sum{{distance(x,y) | y in solution: ~cluster(y)}} = 20.
+//!x,y,z in solution: buddy(x,y) <- distance(x,y) = 4.
 }
+//!x in solution: cluster(x) <= #{y in solution: distance(x,y) = 4 } = 5 .
+//!x,y in solution: distance(x,y) = 2 <= cluster(x) & cluster(y).
 //#{x,y in solution: buddy(x,y)} = n().
 //#{x in solution: cluster(x)} = 4.
 k() = 12.

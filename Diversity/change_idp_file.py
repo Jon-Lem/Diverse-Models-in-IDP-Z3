@@ -330,19 +330,54 @@ def simMatrix(output,goal):
     return simMat
 
 def clustering(simMat,k,n):
+    print(f'distance_threshold = {k//n}')
     model = AgglomerativeClustering(
     metric='precomputed',
     n_clusters=None,
     distance_threshold = k//n, #Wilt dat elke cluster een afstand van 7 met elkaar heeft
     linkage='complete'
     ).fit(simMat)
-    # print(model.labels_)
-    # print(len(model.labels_))
-    # print(f" Number of clusters: {model.n_clusters_}")
+    print(model.labels_)
+    print(len(model.labels_))
+    print(f" Number of clusters: {model.n_clusters_}")
     if(model.n_clusters_ == 1):
         print('Solution is not satisfiable')
         exit()
-    solutions = np.random.choice(model.labels_.size, n, replace=False)
-    solutions = [f's{i}' for i in solutions]
-    print(solutions)
+    # print(set(list(model.labels_)))
+    # solutions = [list(model.labels_).index(x) for x in set(list(model.labels_)) ]
+    # solutions = solutions[:n]
+    solutions = []
+    dist_solutions =[]
+    dist_dict = {}
+    count = []
+    clusters = list(model.labels_)
+    for i in range(len(clusters)):
+        count.append(0)
+        l = []
+        for j in range(len(clusters)):
+            if clusters[i] != clusters[j]:
+                # print(f'cluster i and j: {clusters[i]} , {clusters[j]} : (s{i},s{j}) -> {simMat[i][j]}')
+                if (simMat[i][j] == k//n):
+                    # print(solutions)       
+                    if i not in solutions:
+                        solutions.append(i)
+                    if j not in solutions:
+                        solutions.append(j)
+                        # print(solutions) 
+                    dist_solutions.append(f'(s{i},s{j}) -> {simMat[i][j]}') 
+                    l.append(j)
+                    dist_dict[i] = l
+                    count[i]+=1                          
+    # print(solutions)
+    # print(f'len(solutions) : {len(solutions)}')
+    # print(dist_solutions)
+
+    longest = count.index(max(count))
+    print(longest)
+    print(dist_dict[longest])
+
+    solutions = dist_dict[longest]
+    for i in range(len(solutions)):
+        print(f'(s{longest+1},s{i+1}) -> {simMat[longest][i]}')
+
     return

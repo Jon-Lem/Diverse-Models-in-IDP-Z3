@@ -34,8 +34,8 @@ class idp(IDP):
             output = runCode(foCode)
             # print(output)
             simMat = simMatrix(output,relevant)
-            # for i in simMat:
-            #     print(i)
+            for i in simMat:
+                print(i)
             #Clustering
             clustering(simMat,k,n)
         if method == "Offline":
@@ -52,6 +52,7 @@ class idp(IDP):
             insertCode(lines,n,k,relevant)
             printCode(lines)
             output = runCode(lines)
+            print(output)
         if method == "Online2":
             k_orig = k
             for i in range(1,n+1):
@@ -70,7 +71,7 @@ class idp(IDP):
                     insertCode(lines,i,k,relevant,partSol,isBool,method)
                 # print('==============')
                 # print(i)
-                print('===LINES===')
+                # print('===LINES===')
                 printCode(lines)
                 output = runCode(lines)
                 print(output)
