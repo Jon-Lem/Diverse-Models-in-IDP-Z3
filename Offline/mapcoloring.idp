@@ -6,49 +6,36 @@ vocabulary {
 
   Bordering : country * country -> Bool
 
-type solution := {s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,s26,s27,s28,s29,s30,s31,s32,s33,s34,s35,s36,s37,s38,s39,s40,s41,s42,s43,s44,s45,s46,s47,s48,s49,s50}
+  type solution := {s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,s26,s27,s28,s29,s30,s31,s32,s33,s34,s35,s36,s37,s38,s39,s40,s41,s42,s43,s44,s45,s46,s47,s48,s49,s50}
 
   ColourOf : solution * country -> color
 
-distance: solution * solution -> Int
-//n=2
-//cluster: solution * solution -> Bool
-//n=3
-//cluster: solution * solution * solution -> Bool
-cluster: solution -> Bool
-buddy: solution * solution -> Bool
-truebuddy: solution -> Bool
-k: () -> Int
-n: () -> Int
+  distance: solution * solution -> Int
+
+  vertex: solution * solution -> Bool
+
+  k: () -> Int
+  n: () -> Int
 }
 
 
 theory T:V {
 
-!solution__0 in solution: !x,y in country: Bordering(x,y) =>  ColourOf(solution__0, x) ~=  ColourOf(solution__0, y).  
+ !solution__0 in solution: !x,y in country: Bordering(x,y) =>  ColourOf(solution__0, x) ~=  ColourOf(solution__0, y).  
 
-!solution__x,solution__y in solution: distance(solution__x,solution__y) = #{country__0 in country: ColourOf(solution__x,country__0) ~= ColourOf(solution__y,country__0)}.
+ !solution__x,solution__y in solution: distance(solution__x,solution__y) = #{country__0 in country: ColourOf(solution__x,country__0) ~= ColourOf(solution__y,country__0)}.
 
  sum{{distance(solution__x,solution__y) | solution__x,solution__y in solution: solution__x ~= solution__y }}/2 >= k().
 
-//n=2
-//!x,y in solution: cluster(x,y) => distance(x,y) >= k().
-//n=3
-//!x,y,z in solution: cluster(x,y,z) => ( distance(x,y) + distance(y,z) + distance(z,x) >= k() ) & x~=y & y~=z.
-
 n() = 4.
-{
-!x in solution: cluster(x) <- #{y in solution: distance(x,y) = 2 } = 3 .
-!x in solution: cluster(x) <- !y in solution: distance(x,y) = 2 & cluster(y).
-//!x,y in solution: cluster(x) <- distance(x,y)=2 & ~cluster(y).
-//!x in solution: cluster(x) <- sum{{distance(x,y) | y in solution: ~cluster(y)}} = 20.
-//!x,y,z in solution: buddy(x,y) <- distance(x,y) = 4.
-}
-//!x in solution: cluster(x) <= #{y in solution: distance(x,y) = 4 } = 5 .
-//!x,y in solution: distance(x,y) = 2 <= cluster(x) & cluster(y).
-//#{x,y in solution: buddy(x,y)} = n().
-//#{x in solution: cluster(x)} = 4.
 k() = 12.
+
+{
+
+!x,y in solution: vertex(x,y) <- distance(x,y) >= k()/n().
+}
+
+//#{x,y in solution: vertex(x,y)} = n().
 }
 
 

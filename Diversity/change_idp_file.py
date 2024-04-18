@@ -368,16 +368,17 @@ def clustering(simMat,k,n):
                     l.append(j)
                     dist_dict[i] = l
                     count[i]+=1                          
-    # print(solutions)
     # print(f'len(solutions) : {len(solutions)}')
-    # print(dist_solutions)
+    print(solutions)
+    print(dist_solutions)
 
     longest = count.index(max(count))
     print(longest)
     print(dist_dict[longest])
 
     solutions = dist_dict[longest]
+    solutions = solutions[:n]
     for i in range(len(solutions)):
-        print(f'(s{longest+1},s{i+1}) -> {simMat[longest][i]}')
+        print(f'(s{longest+1},s{solutions[i]+1}) -> {simMat[longest][solutions[i]]}')
 
     return
