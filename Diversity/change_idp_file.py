@@ -301,26 +301,26 @@ def collectBaseSol(lines:list,output:str,relevant:list,isBool:list) -> tuple[int
 
 def simMatrix(output,goal):
     for k in range(len(goal)):
-        qpos = []
+        models = []
         pattern = re.escape(goal[k]) + r' := {(.*)}'
         for line in output.split("\n"):
             match = re.match(pattern,line)
             if match:
                 try: # If predicate
-                    queens = eval("[" + match.group(1) + "]")
+                    model = eval("[" + match.group(1) + "]")
                 except: # If function
-                    queens = re.findall( r'->\s*(\w+)', match.group(1))
-                    # print(queens)
-                    # print(len(queens))
+                    model = re.findall( r'->\s*(\w+)', match.group(1))
+                    # print(model)
+                    # print(len(model))
                     # exit()
-                qpos.append(queens)
-        # print(qpos)
+                models.append(model)
+        # print(models)
         if k==0:
-            simMat = [[0 for _ in range(len(qpos))] for _ in range(len(qpos))]
-        for i in range(len(qpos)):
-            for j in range(len(qpos)):
-                # distance = len(set(qpos[j]) - set(qpos[i]))
-                distance = sum(x != y for x, y in zip(qpos[i], qpos[j]))
+            simMat = [[0 for _ in range(len(models))] for _ in range(len(models))]
+        for i in range(len(models)):
+            for j in range(len(models)):
+                # distance = len(set(models[j]) - set(models[i]))
+                distance = sum(x != y for x, y in zip(models[i], models[j]))
                 if k==0:
                     simMat[i][j] = distance
                 else:
@@ -382,3 +382,77 @@ def clustering(simMat,k,n):
         print(f'(s{longest+1},s{solutions[i]+1}) -> {simMat[longest][solutions[i]]}')
 
     return
+
+def ordering(output,goal):
+    dictlist = [dict() for _ in range(len(goal))]
+    deweylist = []
+    for k in range(len(goal)):
+        models = []
+        dewey = []
+        val = 0
+        pattern = re.escape(goal[k]) + r' := {(.*)}'
+        for line in output.split("\n"):
+            match = re.match(pattern,line)
+            if match:
+                try: # If predicate
+                    model = eval("[" + match.group(1) + "]")
+                except: # If function
+                    model = re.findall( r'->\s*(\w+)', match.group(1))
+                models.append(model)
+                # for i in range(len(model)):
+                #     try:
+                #         dictlist[k][model[i]]
+                #     except:
+                #         dictlist[k][model[i]] = val
+                #         val+=1
+                # print(f'dictionary values: {dictlist[k]}')
+                # dewey.append(translate(model,dictlist[k]))
+        for i in range(len(models[0])):
+            for j in range(len(models)):
+                try:
+                    dictlist[k][models[j][i]]
+                except:
+                    dictlist[k][models[j][i]] = val
+                    val+=1
+            # print(f'dictionary values: {dictlist[k]}')
+        num = 0
+        for model in models:
+            # print(f'Model{num+1}:\n',model)
+            num+=1
+            dewey.append(translate(model,dictlist[k])) 
+        # print(f'Models:\n {models}')
+        # print(f'Dewey Encoding:\n {dewey}')
+        # print(f'dictionary values: {dictlist[k]}')
+        deweylist.append(dewey) #List of lists where each index deweylist corresponds to another function
+    # print(f'===Dict===:\n',dictlist)
+    # print(f'===Deweylist===:\n',deweylist)
+
+def translate(result,valdict):
+    dewey=[]
+    for i in result:
+        dewey.append(valdict[i])
+    # print(f'Result:\n {result}')
+    # print(f'Dewey Encoding:\n {dewey}')
+
+    return dewey
+
+def priorityOrdering(relevant):
+    input = 'priority.txt'
+    order = readCode(input)
+    order = [i.strip('\n\t ') for i in order if i.strip('\n\t ')]
+    # print(order)
+    # print(relevant)
+
+    def custom_sort_key(item):
+        for name in order:
+            if name.lower() in item.lower():
+                return order.index(name)
+        return len(order)
+
+    relevant = sorted(relevant, key=custom_sort_key)
+    # print(relevant)
+
+    return relevant
+
+
+

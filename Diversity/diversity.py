@@ -1,15 +1,11 @@
-from idp_engine import IDP, Theory
-from idp_engine.Parse import TheoryBlock, Structure
-from idp_engine.Run import model_expand
-from typing import Union, Iterator
+from idp_engine import IDP
 import argparse, time
-from change_idp_file import runCode, readCode, insertCode, printCode, checkPredFunc, collectSol, collectBaseSol, simMatrix, clustering, checkFunc, completeFunc
-
+from change_idp_file import *
 relevant = ''
 
 class idp(IDP):    
     def check_method(method:str) -> bool:
-        valid_methods = ["Offline", "Online1", "Online2", "Clustering"]
+        valid_methods = ["Offline", "Online1", "Online2", "Clustering","Ordering"]
         if method in valid_methods:
             return True
         else:
@@ -29,9 +25,15 @@ class idp(IDP):
         # Delete comments 
         lines = [line for line in lines if '//' not in line]
         # printCode(lines)
+        if method == "Ordering":
+            # print(relevant)
+            output = runCode(lines)
+            print(output)
+            relevant = priorityOrdering(relevant)
+            ordering(output,relevant)
+
         if method == "Clustering":
-            foCode = readCode(input)
-            output = runCode(foCode)
+            output = runCode(lines)
             # print(output)
             simMat = simMatrix(output,relevant)
             for i in simMat:
