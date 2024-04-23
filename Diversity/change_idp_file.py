@@ -399,14 +399,6 @@ def ordering(output,goal):
                 except: # If function
                     model = re.findall( r'->\s*(\w+)', match.group(1))
                 models.append(model)
-                # for i in range(len(model)):
-                #     try:
-                #         dictlist[k][model[i]]
-                #     except:
-                #         dictlist[k][model[i]] = val
-                #         val+=1
-                # print(f'dictionary values: {dictlist[k]}')
-                # dewey.append(translate(model,dictlist[k]))
         for i in range(len(models[0])):
             for j in range(len(models)):
                 try:
@@ -420,12 +412,28 @@ def ordering(output,goal):
             # print(f'Model{num+1}:\n',model)
             num+=1
             dewey.append(translate(model,dictlist[k])) 
-        # print(f'Models:\n {models}')
-        # print(f'Dewey Encoding:\n {dewey}')
-        # print(f'dictionary values: {dictlist[k]}')
         deweylist.append(dewey) #List of lists where each index deweylist corresponds to another function
     # print(f'===Dict===:\n',dictlist)
-    # print(f'===Deweylist===:\n',deweylist)
+    # print(len(deweylist[0]))
+    print(f'===Deweylist===:\n',deweylist)
+    # print(f'===DeweyEncoding===:\n')
+    # for i in range(len(goal)):
+    #     print(f'{deweylist[i][0]} '),
+    return dictlist , deweylist
+
+def diversePriority(dictlist,deweylist):
+    diverse_models=[]
+    #Take the value of the first model for the first function
+    for i in range(len(dictlist)):
+        for j in range(deweylist[i]):
+            print(f'Dewey:\n {deweylist[i][j]}')
+            if j == 0:
+                start = deweylist[i][j]
+            if(start != deweylist[i][j]):
+                diverse_models.append(deweylist[i][j])
+
+    return
+
 
 def translate(result,valdict):
     dewey=[]

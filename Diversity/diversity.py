@@ -5,7 +5,7 @@ relevant = ''
 
 class idp(IDP):    
     def check_method(method:str) -> bool:
-        valid_methods = ["Offline", "Online1", "Online2", "Clustering","Ordering"]
+        valid_methods = ["Offline", "Online1", "Online2", "Clustering", "Ordering"]
         if method in valid_methods:
             return True
         else:
@@ -30,7 +30,8 @@ class idp(IDP):
             output = runCode(lines)
             print(output)
             relevant = priorityOrdering(relevant)
-            ordering(output,relevant)
+            print(relevant)
+            dictlist,deweylist = ordering(output,relevant)
 
         if method == "Clustering":
             output = runCode(lines)
