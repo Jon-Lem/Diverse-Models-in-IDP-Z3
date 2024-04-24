@@ -356,8 +356,8 @@ def clustering(simMat,k,n):
         l = []
         for j in range(len(clusters)):
             if clusters[i] != clusters[j]:
-                # print(f'cluster i and j: {clusters[i]} , {clusters[j]} : (s{i},s{j}) -> {simMat[i][j]}')
-                if (simMat[i][j] == k//n):
+                print(f'cluster i and j: {clusters[i]} , {clusters[j]} : (s{i},s{j}) -> {simMat[i][j]}')
+                if (simMat[i][j] == k//n or simMat[i][j] > k//n):
                     # print(solutions)       
                     if i not in solutions:
                         solutions.append(i)
@@ -369,12 +369,17 @@ def clustering(simMat,k,n):
                     dist_dict[i] = l
                     count[i]+=1                          
     # print(f'len(solutions) : {len(solutions)}')
-    print(solutions)
-    print(dist_solutions)
+    if(solutions == []):
+        print('Solution is not satisfiable')
+        exit()
+
+    print('===SOLUTIONS===\n',solutions)
+    print('===DISTANCE-SOLUTIONS===\n',dist_solutions)
 
     longest = count.index(max(count))
-    print(longest)
-    print(dist_dict[longest])
+    print(f'Cluster with the most distances of {k//n}: ',longest)
+    print('===DIST_DICT===\n',dist_dict)
+    print('===DIST_DICT[LONGEST]===\n',dist_dict[longest])
 
     solutions = dist_dict[longest]
     solutions = solutions[:n]
