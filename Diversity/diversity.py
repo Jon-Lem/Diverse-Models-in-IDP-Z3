@@ -12,6 +12,7 @@ class idp(IDP):
             return False
 
     def check_args(input:str,method:str,goal:list) -> None | list:
+
         if not idp.check_method(method):
             print("Error: Given method does not exist")
             exit()
@@ -24,6 +25,7 @@ class idp(IDP):
         lines = readCode(input)   
         # Delete comments 
         lines = [line for line in lines if '//' not in line]
+        checkFunc(lines,relevant)
         # printCode(lines)
         if method == "Ordering":
             # print(relevant)
