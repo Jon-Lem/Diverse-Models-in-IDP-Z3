@@ -5,7 +5,7 @@ relevant = ''
 
 class idp(IDP):    
     def check_method(method:str) -> bool:
-        valid_methods = ["Offline", "Online1", "Online2", "Clustering", "Ordering"]
+        valid_methods = ["Base", "Offline", "Online1", "Online2", "Clustering", "Ordering"]
         if method in valid_methods:
             return True
         else:
@@ -25,6 +25,9 @@ class idp(IDP):
         # Delete comments 
         lines = [line for line in lines if '//' not in line]
         # printCode(lines)
+        if method == "Base":
+            output = runCode(lines)
+            print(output)
         if method == "Ordering":
             # print(relevant)
             output = runCode(lines)
