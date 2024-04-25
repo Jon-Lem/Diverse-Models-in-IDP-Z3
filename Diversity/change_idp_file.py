@@ -1,7 +1,8 @@
 # Programma dat zoekt naar n oplossingen die een totale afstand hebben van k
 # Dus k is de som van d(sx,sy) voor sx,sy deel van de oplossingen verzameling
-
+from scipy.cluster.hierarchy import dendrogram
 from sklearn.cluster import AgglomerativeClustering
+from matplotlib import pyplot as plt
 from idp_engine import IDP
 import contextlib
 import io, re, os
@@ -329,14 +330,39 @@ def simMatrix(output,goal):
     
     return simMat
 
+def plot_dendrogram(model, **kwargs):
+    # Create linkage matrix and then plot the dendrogram
+
+    # create the counts of samples under each node
+    counts = np.zeros(model.children_.shape[0])
+    n_samples = len(model.labels_)
+    for i, merge in enumerate(model.children_):
+        current_count = 0
+        for child_idx in merge:
+            if child_idx < n_samples:
+                current_count += 1  # leaf node
+            else:
+                current_count += counts[child_idx - n_samples]
+        counts[i] = current_count
+
+    linkage_matrix = np.column_stack(
+        [model.children_, model.distances_, counts]
+    ).astype(float)
+
+    # Plot the corresponding dendrogram
+    dendrogram(linkage_matrix, **kwargs)
+
+
 def clustering(simMat,k,n):
     print(f'distance_threshold = {k//n}')
+
     model = AgglomerativeClustering(
     metric='precomputed',
     n_clusters=None,
     distance_threshold = k//n, #Wilt dat elke cluster een afstand van 7 met elkaar heeft
     linkage='complete'
     ).fit(simMat)
+
     print(model.labels_)
     print(len(model.labels_))
     print(f" Number of clusters: {model.n_clusters_}")
@@ -346,6 +372,13 @@ def clustering(simMat,k,n):
     # print(set(list(model.labels_)))
     # solutions = [list(model.labels_).index(x) for x in set(list(model.labels_)) ]
     # solutions = solutions[:n]
+
+    plt.title("Hierarchical Clustering Dendrogram")
+    # plot the top three levels of the dendrogram
+    plot_dendrogram(model, truncate_mode="level", p=3)
+    plt.xlabel("Number of points in node (or index of point if no parenthesis).")
+    plt.show()
+
     solutions = []
     dist_solutions =[]
     dist_dict = {}
