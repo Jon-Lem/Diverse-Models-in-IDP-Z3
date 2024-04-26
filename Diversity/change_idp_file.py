@@ -1,6 +1,8 @@
 # Programma dat zoekt naar n oplossingen die een totale afstand hebben van k
 # Dus k is de som van d(sx,sy) voor sx,sy deel van de oplossingen verzameling
-from scipy.cluster.hierarchy import dendrogram
+from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.spatial.distance import squareform
+from sklearn.metrics import silhouette_score
 from sklearn.cluster import AgglomerativeClustering
 from matplotlib import pyplot as plt
 from idp_engine import IDP
@@ -29,7 +31,6 @@ def completeFunc(lines,relevant:list) -> Iterator[str]:
     relevant= [re.match(pattern, line).group(1) for line in voc_lines if re.match(pattern, line)]
     # print(relevant)
     return relevant
-
 
 def checkFunc(lines:list,relevant:list) -> None:
     target = "vocabulary"
@@ -329,7 +330,6 @@ def simMatrix(output,goal):
                 # print(f"simMat[{i}][{j}] = {simMat[i][j]}")
     
     return simMat
-
 def plot_dendrogram(model, **kwargs):
     # Create linkage matrix and then plot the dendrogram
 
@@ -352,19 +352,36 @@ def plot_dendrogram(model, **kwargs):
     # Plot the corresponding dendrogram
     dendrogram(linkage_matrix, **kwargs)
 
-
 def clustering(simMat,k,n):
-    print(f'distance_threshold = {k//n}')
+    # print(f'distance_threshold = {k//n}')
+    linkage_type ='complete'
+    range_n_clusters = [2, 3, 4, 5, 6]
+    best_sil = -1
+    num_cluster=0
+    best_model = None
+    for n_clusters in range(2,len(simMat)):
+        clusterer = AgglomerativeClustering(metric='precomputed',n_clusters=n_clusters, linkage=linkage_type)
+        model = clusterer.fit(simMat)
+        cluster_labels = model.labels_
+        silhouette_avg = silhouette_score(simMat, cluster_labels , metric="precomputed", )
+        # print(
+        #     "For n_clusters =",
+        #     n_clusters,
+        #     "The average silhouette_score is :",
+        #     silhouette_avg,
+        # )
+        if silhouette_avg > best_sil and n_clusters != 2:
+            best_sil = silhouette_avg
+            best_model = model
+            num_cluster = n_clusters
 
-    model = AgglomerativeClustering(
-    metric='precomputed',
-    n_clusters=None,
-    distance_threshold = k//n, #Wilt dat elke cluster een afstand van 7 met elkaar heeft
-    linkage='complete'
-    ).fit(simMat)
+    # model = AgglomerativeClustering(
+    # metric='precomputed',
+    # n_clusters=None,
+    # distance_threshold = k//n, #Wilt dat elke cluster een afstand van 7 met elkaar heeft
+    # linkage=linkage_type
+    # ).fit(simMat)
 
-    print(model.labels_)
-    print(len(model.labels_))
     print(f" Number of clusters: {model.n_clusters_}")
     if(model.n_clusters_ == 1):
         print('Solution is not satisfiable')
@@ -373,11 +390,17 @@ def clustering(simMat,k,n):
     # solutions = [list(model.labels_).index(x) for x in set(list(model.labels_)) ]
     # solutions = solutions[:n]
 
-    plt.title("Hierarchical Clustering Dendrogram")
-    # plot the top three levels of the dendrogram
-    plot_dendrogram(model, truncate_mode="level", p=3)
-    plt.xlabel("Number of points in node (or index of point if no parenthesis).")
-    plt.show()
+    # plt.title("Hierarchical Clustering Dendrogram")
+    # x = squareform(simMat)
+    # temp = linkage(x, linkage_type)
+    # dendrogram(temp, above_threshold_color="green", color_threshold=k//n , orientation='right')
+    # plt.show()
+
+    # plt.title("Hierarchical Clustering Dendrogram")
+    # # plot the top three levels of the dendrogram
+    # plot_dendrogram(model, truncate_mode="level", p=3)
+    # plt.xlabel("Number of points in node (or index of point if no parenthesis).")
+    # plt.show()
 
     solutions = []
     dist_solutions =[]
@@ -388,8 +411,10 @@ def clustering(simMat,k,n):
         count.append(0)
         l = []
         for j in range(len(clusters)):
+            # if clusters[i] == clusters[j] and simMat[i][j] == 1:
+            #     print(f'(s{i},s{j}) -> {simMat[i][j]}')
             if clusters[i] != clusters[j]:
-                print(f'cluster i and j: {clusters[i]} , {clusters[j]} : (s{i},s{j}) -> {simMat[i][j]}')
+                # print(f'cluster i and j: {clusters[i]} , {clusters[j]} : (s{i},s{j}) -> {simMat[i][j]}')
                 if (simMat[i][j] == k//n or simMat[i][j] > k//n):
                     # print(solutions)       
                     if i not in solutions:
@@ -406,13 +431,12 @@ def clustering(simMat,k,n):
         print('Solution is not satisfiable')
         exit()
 
-    print('===SOLUTIONS===\n',solutions)
-    print('===DISTANCE-SOLUTIONS===\n',dist_solutions)
-
+    # print('===SOLUTIONS===\n',solutions)
+    # print('===DISTANCE-SOLUTIONS===\n',dist_solutions)
     longest = count.index(max(count))
-    print(f'Cluster with the most distances of {k//n}: ',longest)
-    print('===DIST_DICT===\n',dist_dict)
-    print('===DIST_DICT[LONGEST]===\n',dist_dict[longest])
+    # print(f'Cluster with the most distances of {k//n}: ',longest)
+    # print('===DIST_DICT===\n',dist_dict)
+    # print('===DIST_DICT[LONGEST]===\n',dist_dict[longest])
 
     solutions = dist_dict[longest]
     solutions = solutions[:n]
