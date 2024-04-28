@@ -1,11 +1,15 @@
 from idp_engine import IDP
 import argparse, time
 from change_idp_file import *
+from clustering import *
+from ordering import *
+from relevance import *
+
 relevant = ''
 
 class idp(IDP):    
     def check_method(method:str) -> bool:
-        valid_methods = ["Base", "Offline", "Online1", "Online2", "Clustering", "Ordering"]
+        valid_methods = ["Base", "Offline", "Online1", "Online2", "Clustering", "Ordering","Relevance"]
         if method in valid_methods:
             return True
         else:
@@ -30,6 +34,10 @@ class idp(IDP):
         if method == "Base":
             output = runCode(lines)
             print(output)
+        if method == "Relevance":
+            file = 'priority.txt'
+            relevance_dict = getOrdering(file)
+            distTheory(relevance_dict,'Security',relevant)
         if method == "Ordering":
             # print(relevant)
             output = runCode(lines)
@@ -37,7 +45,6 @@ class idp(IDP):
             relevant = priorityOrdering(relevant)
             print(relevant)
             dictlist,deweylist = ordering(output,relevant)
-
         if method == "Clustering":
             output = runCode(lines)
             # print(output)
