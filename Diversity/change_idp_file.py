@@ -352,28 +352,63 @@ def plot_dendrogram(model, **kwargs):
     # Plot the corresponding dendrogram
     dendrogram(linkage_matrix, **kwargs)
 
+def distCheck(simMat,solutions,k):
+    print(solutions)
+    sum_distance = 0
+    for i in range(len(solutions)):
+        for j in range(len(solutions)):
+            a = solutions[i]
+            b = solutions[j]
+            sum_distance += simMat[a][b]
+            # print(f'(s{a+1},s{b+1}) -> {simMat[a][b]}')
+    if(sum_distance//2 >= k):
+        print("distCheck 1")
+        print(sum_distance//2)
+        return True
+    else: 
+        print("distCheck 0")
+        return False
+    
+def prettyPrint(simMat,solutions,k):
+    dist = []
+    for i in range(len(solutions)):
+        for j in range(len(solutions)):
+            a = solutions[i]
+            b = solutions[j]
+            dist.append(f'(s{a+1},s{b+1}) -> {simMat[a][b]}')
+    distance = ','.join(dist)
+    print('distance := {' + distance + '}.')
+    print(f'k := {k}.')
+
+def clusterComp(clusters:list,i:int,j:int,l:list):
+    if clusters[i] != clusters[j] and l == []:
+        return True
+    elif clusters[i] != clusters[j] and l != [] :
+        for item in l:
+            if(clusters[j] == clusters[item]):
+                return False
+        return True
+    else:
+        return False
+
 def clustering(simMat,k,n):
     # print(f'distance_threshold = {k//n}')
     linkage_type ='complete'
-    range_n_clusters = [2, 3, 4, 5, 6]
     best_sil = -1
-    num_cluster=0
     best_model = None
     for n_clusters in range(2,len(simMat)):
         clusterer = AgglomerativeClustering(metric='precomputed',n_clusters=n_clusters, linkage=linkage_type)
         model = clusterer.fit(simMat)
         cluster_labels = model.labels_
         silhouette_avg = silhouette_score(simMat, cluster_labels , metric="precomputed", )
-        # print(
-        #     "For n_clusters =",
-        #     n_clusters,
-        #     "The average silhouette_score is :",
-        #     silhouette_avg,
-        # )
+        # if (silhouette_avg < 0.17):
+        #     break
+        # print("For n_clusters =" ,n_clusters, "The average silhouette_score is :", silhouette_avg,)
         if silhouette_avg > best_sil and n_clusters != 2:
             best_sil = silhouette_avg
             best_model = model
             num_cluster = n_clusters
+    model = best_model
 
     # model = AgglomerativeClustering(
     # metric='precomputed',
@@ -403,45 +438,86 @@ def clustering(simMat,k,n):
     # plt.show()
 
     solutions = []
-    dist_solutions =[]
-    dist_dict = {}
-    count = []
+    found_solution = False
     clusters = list(model.labels_)
     for i in range(len(clusters)):
-        count.append(0)
+        print(f'===NEW_I===\n',i)
         l = []
         for j in range(len(clusters)):
-            # if clusters[i] == clusters[j] and simMat[i][j] == 1:
-            #     print(f'(s{i},s{j}) -> {simMat[i][j]}')
-            if clusters[i] != clusters[j]:
+            if i != 0 and len(solutions) == n-1:
+                found_solution = True
+                break
+            if clusterComp(clusters,i,j,l):
                 # print(f'cluster i and j: {clusters[i]} , {clusters[j]} : (s{i},s{j}) -> {simMat[i][j]}')
-                if (simMat[i][j] == k//n or simMat[i][j] > k//n):
-                    # print(solutions)       
+                if (simMat[i][j] >= k/n):
                     if i not in solutions:
                         solutions.append(i)
                     if j not in solutions:
                         solutions.append(j)
                         # print(solutions) 
-                    dist_solutions.append(f'(s{i},s{j}) -> {simMat[i][j]}') 
+                    print(f'===BEFORE_CHECK_SOLUTIONS===\n',solutions)
+                    if(len(solutions) == n):
+                        # Check the distances 
+                        if distCheck(simMat,solutions,k):
+                            found_solution = True
+                            break
+                        else:
+                            # Gooi een oplossing weg
+                            solutions=[]
+
+                    print(f'===SOLUTIONS===\n',solutions)
+                    # dist_solutions.append(f'(s{i},s{j}) -> {simMat[i][j]}') 
                     l.append(j)
-                    dist_dict[i] = l
-                    count[i]+=1                          
+                    # dist_dict[i] = l
+                    # count[i]+=1     
+        if found_solution == True:
+            print("HIER")
+            break     
+    
     # print(f'len(solutions) : {len(solutions)}')
-    if(solutions == []):
+    found_solution = False
+    if len(solutions) == n-1:
+        for i in range(len(clusters)):
+            for j in range(len(clusters)):
+                    if i not in solutions:
+                        solutions.append(i)
+                        if distCheck(simMat,solutions,k):
+                                found_solution = True
+                                break
+                        else:
+                            solutions= solutions[:-1]
+                    elif j not in solutions:
+                        solutions.append(i)
+                        if distCheck(simMat,solutions,k):
+                                found_solution = True
+                                break
+                        else:
+                            solutions= solutions[:-1]
+            if found_solution == True:
+                print("HIER")
+                break   
+
+    solutions=[]
+    found_solution = False
+    for i in range(len(clusters)):
+        for j in range(len(clusters)): 
+            if(simMat[i][j] >= k/n):
+                print(f'(s{i},s{j}) -> {simMat[i][j]}')
+                if i not in solutions: solutions.append(i)
+                if j not in solutions: solutions.append(j)
+    n_solutions=solutions[0:n]
+    i = 0
+    while not distCheck(simMat,n_solutions,k) and len(solutions) > n+i:
+        i+=1
+        n_solutions = solutions[i:n+i]
+    print(solutions)
+
+    print(n_solutions)
+    solutions = n_solutions
+    if(len(solutions) < n ):
         print('Solution is not satisfiable')
         exit()
-
-    # print('===SOLUTIONS===\n',solutions)
-    # print('===DISTANCE-SOLUTIONS===\n',dist_solutions)
-    longest = count.index(max(count))
-    # print(f'Cluster with the most distances of {k//n}: ',longest)
-    # print('===DIST_DICT===\n',dist_dict)
-    # print('===DIST_DICT[LONGEST]===\n',dist_dict[longest])
-
-    solutions = dist_dict[longest]
-    solutions = solutions[:n]
-    for i in range(len(solutions)):
-        print(f'(s{longest+1},s{solutions[i]+1}) -> {simMat[longest][solutions[i]]}')
+    prettyPrint(simMat,solutions,k)
 
     return
 
