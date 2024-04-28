@@ -11,6 +11,8 @@ import io, re, os
 import numpy as np
 from typing import Iterator
 
+distcheck = 0
+
 def printCode(lines:list) -> None:
     [print(i) for i in lines]
     return
@@ -364,6 +366,8 @@ def distCheck(simMat,solutions,k):
     if(sum_distance//2 >= k):
         print("distCheck 1")
         print(sum_distance//2)
+        global distcheck
+        distcheck=1
         return True
     else: 
         print("distCheck 0")
@@ -438,83 +442,25 @@ def clustering(simMat,k,n):
     # plt.show()
 
     solutions = []
-    found_solution = False
     clusters = list(model.labels_)
     for i in range(len(clusters)):
-        print(f'===NEW_I===\n',i)
         l = []
         for j in range(len(clusters)):
-            if i != 0 and len(solutions) == n-1:
-                found_solution = True
-                break
-            if clusterComp(clusters,i,j,l):
-                # print(f'cluster i and j: {clusters[i]} , {clusters[j]} : (s{i},s{j}) -> {simMat[i][j]}')
-                if (simMat[i][j] >= k/n):
-                    if i not in solutions:
-                        solutions.append(i)
-                    if j not in solutions:
-                        solutions.append(j)
-                        # print(solutions) 
-                    print(f'===BEFORE_CHECK_SOLUTIONS===\n',solutions)
-                    if(len(solutions) == n):
-                        # Check the distances 
-                        if distCheck(simMat,solutions,k):
-                            found_solution = True
-                            break
-                        else:
-                            # Gooi een oplossing weg
-                            solutions=[]
-
-                    print(f'===SOLUTIONS===\n',solutions)
-                    # dist_solutions.append(f'(s{i},s{j}) -> {simMat[i][j]}') 
+            if clusterComp(clusters,i,j,l): 
+                if(simMat[i][j] >= k/n):
+                    # print(f'(s{i},s{j}) -> {simMat[i][j]}')
+                    if i not in solutions: solutions.append(i)
+                    if j not in solutions: solutions.append(j)
                     l.append(j)
-                    # dist_dict[i] = l
-                    # count[i]+=1     
-        if found_solution == True:
-            print("HIER")
-            break     
-    
-    # print(f'len(solutions) : {len(solutions)}')
-    found_solution = False
-    if len(solutions) == n-1:
-        for i in range(len(clusters)):
-            for j in range(len(clusters)):
-                    if i not in solutions:
-                        solutions.append(i)
-                        if distCheck(simMat,solutions,k):
-                                found_solution = True
-                                break
-                        else:
-                            solutions= solutions[:-1]
-                    elif j not in solutions:
-                        solutions.append(i)
-                        if distCheck(simMat,solutions,k):
-                                found_solution = True
-                                break
-                        else:
-                            solutions= solutions[:-1]
-            if found_solution == True:
-                print("HIER")
-                break   
-
-    solutions=[]
-    found_solution = False
-    for i in range(len(clusters)):
-        for j in range(len(clusters)): 
-            if(simMat[i][j] >= k/n):
-                print(f'(s{i},s{j}) -> {simMat[i][j]}')
-                if i not in solutions: solutions.append(i)
-                if j not in solutions: solutions.append(j)
     n_solutions=solutions[0:n]
     i = 0
     while not distCheck(simMat,n_solutions,k) and len(solutions) > n+i:
         i+=1
         n_solutions = solutions[i:n+i]
-    print(solutions)
-
-    print(n_solutions)
+    # print(solutions)
+    # print(n_solutions)
     solutions = n_solutions
-    if(len(solutions) < n ):
+    if(distcheck==0):
         print('Solution is not satisfiable')
         exit()
     prettyPrint(simMat,solutions,k)
