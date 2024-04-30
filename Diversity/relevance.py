@@ -12,10 +12,10 @@ def getOrdering(input):
     for line in lines :
         match = re.match(r'\w+',line)
         if match:
-            print(line)
+            # print(line)
             types.append(line.strip('\n\t '))     
         else:
-            print(ordering)
+            # print(ordering)
             relevance_dict[ordering[-i]] = types
             types = []
             i+=1
@@ -37,11 +37,12 @@ def convertName(types,relevant):
 def distTheory(relevance_dict:dict,goal:str,relevant:str):
     a = f'{goal}__0'
     b = f'{goal}__1'
-    dist_theory = f'{a},{b} in {goal}: distance({a},{b}) = '
+    dist_theory = f'!{a},{b} in {goal}: distance({a},{b}) = '
     dist_theory_list = []
     for i in range(len(ordering)):
         types = relevance_dict[ordering[i]] 
         types = convertName(types,relevant)
+        # print(types)
         if i == 0:
             order_score = 1
         else:
@@ -50,5 +51,5 @@ def distTheory(relevance_dict:dict,goal:str,relevant:str):
             dist_theory_list.append(f'(if {typ}({a}) ~= {typ}({b}) then {order_score} else 0)')
     
     dist_theory += ' + '.join(dist_theory_list) + '.'
-    print(dist_theory)
+    # print(dist_theory)
     return dist_theory

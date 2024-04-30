@@ -81,7 +81,35 @@ def dist_expr(relation:str,goal:str) -> str:
 
     return dist_theory
 
-def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=None):
+def indexEndofBlock(lines:list,index:int):
+    open = indexsearch(lines[index:],"{") + index
+    close = indexsearch(lines[index:],"}") + index
+    while (close > open):
+        # print('OPEN: Index',open,'Line:',lines[open])
+        # print('CLOSE: Index',close,'Line:',lines[close])
+        index = close+1
+        close = indexsearch(lines[index:],"}") + index
+        # print('CLOSE: Index',close,'Line:',lines[close])
+        if indexsearch(lines[index:],"{") == -1:
+            break
+        open = indexsearch(lines[index:],"{") + index
+    end_theory = close
+    return end_theory
+
+def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=None,dist_theory=None):
+
+    if method == 'Relevance' and dist_theory != None:
+        
+        dist_voc = "distance: Security * Security -> Int"
+        target="type Security"
+        index = indexsearch(lines,target)
+        lines.insert(index+1,dist_voc)
+        target="theory"
+        index = indexsearch(lines,target)
+        end_theory = indexEndofBlock(lines,index)
+        lines.insert(end_theory,dist_theory)
+        return
+
     type_sol = "type solution := {"
     for i in range(1,n):
         type_sol += f"s{i},"
@@ -163,7 +191,7 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
 
     target="theory"
     index = indexsearch(lines,target)
-    end_theory = indexsearch(lines[index:],"}") + index
+    end_theory = indexEndofBlock(lines,index)
 
     for func in goal:
     # Update existing theory with solution type

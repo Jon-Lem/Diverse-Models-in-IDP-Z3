@@ -9,7 +9,7 @@ relevant = ''
 
 class idp(IDP):    
     def check_method(method:str) -> bool:
-        valid_methods = ["Base", "Offline", "Online1", "Online2", "Clustering", "Ordering","Relevance"]
+        valid_methods = ["Base", "Offline", "Online1", "Online2", "Clustering", "Ordering", "Relevance"]
         if method in valid_methods:
             return True
         else:
@@ -35,9 +35,13 @@ class idp(IDP):
             output = runCode(lines)
             print(output)
         if method == "Relevance":
+            # print(lines)
             file = 'priority.txt'
             relevance_dict = getOrdering(file)
-            distTheory(relevance_dict,'Security',relevant)
+            dist_theory = distTheory(relevance_dict,'Security',relevant)
+            insertCode(lines,n,k,relevant,method=method,dist_theory=dist_theory)
+            printCode(lines)
+            output = runCode(lines)
         if method == "Ordering":
             # print(relevant)
             output = runCode(lines)
