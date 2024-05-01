@@ -23,7 +23,8 @@ def completeFunc(lines,relevant:list) -> Iterator[str]:
     end_voc = indexsearch(lines[begin_voc:],"}") + begin_voc    
     voc_lines = lines[begin_voc:end_voc]
     # print(voc_lines)
-    pattern = r'^\s*(\w+)\s*:\s*\w'
+    # pattern = r'^\s*(\w+)\s*:\s*\w'
+    pattern = r'^\s*(\w+)\s*:\s*'
     relevant= [re.match(pattern, line).group(1) for line in voc_lines if re.match(pattern, line)]
     # print(relevant)
     return relevant
@@ -70,34 +71,44 @@ def dist_expr(relation:str,goal:str) -> str:
     relation = relation.split("*")
     relation= [i.strip() for i in relation]
     relation = [(x,relation.count(x)) for x in set(relation)]
-    # print(relation)
     dist_theory = ''
     for word,count in relation:
         element = ','.join([f"{word}__{i}" for i in range(count)])
         if count > 1:
             dist_theory += f"#{{{element} in {word}: {goal}(solution__x,{element}) ~= {goal}(solution__y,{element})}}/{count}"
+        elif '()' in word:
+            dist_theory += f'(if {goal}(solution__x) ~= {goal}(solution__y) then 1 else 0)'
         else:
             dist_theory += f"#{{{element} in {word}: {goal}(solution__x,{element}) ~= {goal}(solution__y,{element})}}"
-
     return dist_theory
 
 def indexEndofBlock(lines:list,index:int):
-    open = indexsearch(lines[index:],"{") + index
     close = indexsearch(lines[index:],"}") + index
-    while (close > open):
+    if indexsearch(lines[index:],"{") == -1:
+        return close
+    open = indexsearch(lines[index:],"{") + index
+    old_close = close
+    while (old_close > open):
         # print('OPEN: Index',open,'Line:',lines[open])
-        # print('CLOSE: Index',close,'Line:',lines[close])
-        index = close+1
-        close = indexsearch(lines[index:],"}") + index
-        # print('CLOSE: Index',close,'Line:',lines[close])
-        if indexsearch(lines[index:],"{") == -1:
+        # print(lines[open:old_close+1])
+        # print('CLOSE: Index',old_close,'Line:',lines[old_close])
+        index = old_close+1
+        new_close = indexsearch(lines[index:],"}") + index
+        if new_close > old_close and old_close > open:
+            close = new_close
             break
+        old_close = new_close
+        if indexsearch(lines[index:],"{") == -1:
+            # print('Hier')
+            break
+        # print('CLOSE: Index',close,'Line:',lines[close])
         open = indexsearch(lines[index:],"{") + index
     end_theory = close
     return end_theory
 
 def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=None,dist_theory=None):
 
+    cte = [0 for _ in range(len(goal))]
     if method == 'Relevance' and dist_theory != None:
         
         dist_voc = "distance: Security * Security -> Int"
@@ -177,15 +188,30 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
     # Update predicate/function
     dist_theory = "!solution__x,solution__y in solution: distance(solution__x,solution__y) = "   
     cardinal = []
+    first = True
+    idx=0
+    indx = 0
     for func in goal:
         target=f"{func}"
         index = indexsearch(lines,target)
+        if first:
+            idx = index
+            first = False
         cardinal.append(dist_expr(lines[index].split(':')[1],func))
+        # print(lines[index])
+        # print(lines[index].split(':')[1])
+        if '()' in lines[index]:
+            lines[index] = lines[index].replace("()", "solution")
+            cte[indx] = 1
+            # print(lines[index])            
+            continue
         lines[index] = lines[index].split(':')[0] + ": solution *" + lines[index].split(':')[1]
+        indx += 1
+        # print(lines[index])
     dist_theory += "+".join(cardinal) + '.'
     # print(dist_theory)
-    
-    lines.insert(index,type_sol)
+
+    lines.insert(idx,type_sol)
     lines.insert(index+2,k_voc)
     lines.insert(index+2,dist_voc +end)
 
@@ -193,31 +219,51 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
     index = indexsearch(lines,target)
     end_theory = indexEndofBlock(lines,index)
 
-    for func in goal:
+    # print(lines[index:end_theory+1])
+    # exit()
     # Update existing theory with solution type
+    indx = 0
+    for func in goal:
+        target="theory"
+        index = indexsearch(lines,target)
         # print(func)
         func_theory_idx = [i for i in range(len(lines)) if func in lines[i] and i >= index  and i < end_theory]
         # print(func_theory_idx)
         pattern = r'\b' + re.escape(func) + r'\s*\((.*?)\)'
         for i in func_theory_idx:
-            lines[i] = re.sub(pattern, re.escape(func) + r'(solution__0, \1)', lines[i])
+            if '()' in lines[i] and cte[indx]:
+                lines[i] = re.sub(pattern, re.escape(func) + r'(solution__0)', lines[i])
+            else: 
+                lines[i] = re.sub(pattern, re.escape(func) + r'(solution__0, \1)', lines[i])
             if(func == goal[0]):
                 lines[i] = "!solution__0 in solution:" + lines[i]
             index = i
-
+        indx += 1
     lines.insert(index+1,k_theory)
     lines.insert(index+1,k_dist_theory + end)
     lines.insert(index+1,dist_theory + end)
 
     # Update the structure, if relevant functions present
+    indx = 0
+    print(cte)
     for func in goal:
         target = "structure"
         begin_struct = indexsearch(lines,target)
         end_struct = indexsearch(lines[begin_struct:],"}") + begin_struct
         index = indexsearch(lines[begin_struct:end_struct],func)
         if index == -1:
+            indx += 1
             continue
         else: index += begin_struct
+        # print(indx)
+        if cte[indx]:
+            value_cte = lines[index].split(':=')[1].strip().strip('.')
+            struct_cte_values = f"{func} := {{"
+            for i in range(1,n):
+                struct_cte_values += f"s{i} -> {value_cte}, "
+            struct_cte_values+=f"s{n} -> {value_cte} " + "}.\n"
+            lines[index] = struct_cte_values
+            continue
         tuples_pattern = re.compile(r'\((.*?)\)')
         tuples = tuples_pattern.findall(lines[index])
         # print(tuples)
@@ -227,6 +273,9 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
         # print(formatted_tuples)
         func_struct = ",".join(formatted_tuples)
         lines[index] = f"{func} := {{" + func_struct + "}."
+        indx += 1   
+    # printCode(lines)
+    # exit()
 
     if(isBool != None and method == "Offline"):
         for i in range(len(isBool)):
