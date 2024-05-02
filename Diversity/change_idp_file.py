@@ -65,9 +65,7 @@ def runCode(lines):
 
 # Haal de belangrijkste 
 def dist_expr(relation:str,goal:str) -> str:
-    # print(relation)
     relation = relation.split("->")[0].strip()
-    # print(relation)    
     relation = relation.split("*")
     relation= [i.strip() for i in relation]
     relation = [(x,relation.count(x)) for x in set(relation)]
@@ -89,9 +87,6 @@ def indexEndofBlock(lines:list,index:int):
     open = indexsearch(lines[index:],"{") + index
     old_close = close
     while (old_close > open):
-        # print('OPEN: Index',open,'Line:',lines[open])
-        # print(lines[open:old_close+1])
-        # print('CLOSE: Index',old_close,'Line:',lines[old_close])
         index = old_close+1
         new_close = indexsearch(lines[index:],"}") + index
         if new_close > old_close and old_close > open:
@@ -99,9 +94,7 @@ def indexEndofBlock(lines:list,index:int):
             break
         old_close = new_close
         if indexsearch(lines[index:],"{") == -1:
-            # print('Hier')
             break
-        # print('CLOSE: Index',close,'Line:',lines[close])
         open = indexsearch(lines[index:],"{") + index
     end_theory = close
     return end_theory
@@ -231,10 +224,10 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
         # print(func_theory_idx)
         pattern = r'\b' + re.escape(func) + r'\s*\((.*?)\)'
         for i in func_theory_idx:
-            print(lines[i])
+            # print(lines[i])
             if f'{func}()' in lines[i]:
                 lines[i] = re.sub(pattern, re.escape(func) + r'(solution__0)', lines[i])
-                print(lines[i])
+                # print(lines[i])
             else: 
                 lines[i] = re.sub(pattern, re.escape(func) + r'(solution__0, \1)', lines[i])
             if(func == goal[0]):
@@ -247,7 +240,7 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
 
     # Update the structure, if relevant functions present
     indx = 0
-    print(cte)
+    # print(cte)
     for func in goal:
         target = "structure"
         begin_struct = indexsearch(lines,target)
@@ -287,6 +280,9 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
             else:
                 target="structure"
                 index = indexsearch(lines,target)+1
+                if index == 0:
+                    # Create Structure
+                    print('Create Structure')
             lines.insert(index,partSol[i])
 
     return 
@@ -355,14 +351,19 @@ def collectBaseSol(lines:list,output:str,relevant:list,isBool:list) -> tuple[int
                 n+=1
                 continue
             target = f"{relevant[i]}"
-            if line.strip().startswith(target):      
+            if line.strip().startswith(target): 
+                print('===LINE===\n',line)     
                 if isBool[i] == 1:
                     tuples_pattern = re.compile(r'\((.*?)\)')
                     tuples = tuples_pattern.findall(line)
                     # print(line)
-                    # print(tuples)
+                    print(tuples)
                     formatted_tuples = [f"{relevant[i]}(s{n}, {t})" for t in tuples]
-                    # print(formatted_tuples)
+                    print(formatted_tuples)
+                    if formatted_tuples == []:
+                        part_sol = ''
+                        partsol += part_sol + "   "
+                        continue
                     part_sol = " & ".join(formatted_tuples)
                     partsol += part_sol + " & "
                     # print(partsol)    
@@ -370,10 +371,22 @@ def collectBaseSol(lines:list,output:str,relevant:list,isBool:list) -> tuple[int
                     result_pattern = r"(\b\w+(?:,\w+)?)\s*->\s*(\w+)"
                     match = re.findall(result_pattern,line)
                     formatted_tuples = [f"(s{n},{domain}) -> {range}" for domain,range in match]
+                    # print(formatted_tuples)
+                    if formatted_tuples == []:
+                        range_ = line.split(':=')[1].strip().strip('.')
+                        part_sol = f's{n} -> {range_}'
+                        print(part_sol)
+                        partsol += part_sol + " , "
+                        continue
                     part_sol = ", ".join(formatted_tuples)
                     partsol += part_sol + " , "
+                    print(partsol)
+        if partsol == '':
+            continue
         partsol = partsol[:-2]+ '}.' if isBool[i] == 0 else  partsol[:-2]+'.'
         partSol.append(partsol)
+        print(partSol)
+    # exit()
     return n,partSol
 
 
