@@ -1,5 +1,5 @@
 import re
-from change_idp_file import readCode
+from print import *
 
 def ordering(output,goal):
     dictlist = [dict() for _ in range(len(goal))]

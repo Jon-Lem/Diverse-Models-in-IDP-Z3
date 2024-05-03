@@ -28,11 +28,15 @@ theory T:V {
 n() = 4.
 k() = 12.
 
+//!x,y in solution: edge(x,y) = 0.
 //{
-!x,y in solution: edge(x,y) = distance(x,y) <- distance(x,y) >= k()/n().
+//!x,y in solution: edge(x,y) = distance(x,y) <- distance(x,y) >= k()/n().
 //}
-#{x,y in solution: edge(x,y) = distance(x,y)} = n().
-//!x,y in solution: edge(x,y) = distance(x,y) => distance(x,y) >= k() / n().
+//!x,y in solution: (distance(x,y) > 3) => edge(x,y) = 66.
+!x,y in solution: edge(x,y) = if(distance(x,y) >= k()/n() then (distance(x,y)) else 0).
+//!x,y in solution: ( edge(x,y) = distance(x,y) ) <=> ( distance(x,y) >= k() / n() ).
+//#{x,y in solution: edge(x,y) = distance(x,y)} = n().
+
 
 }
 

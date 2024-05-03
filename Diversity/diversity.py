@@ -4,6 +4,8 @@ from change_idp_file import *
 from clustering import *
 from ordering import *
 from relevance import *
+from print import *
+import var
 
 relevant = ''
 
@@ -26,6 +28,7 @@ class idp(IDP):
             return goal
 
     def diverse_model_generation(input:str,n:int,k:int,relevant:list,method:str):
+        var.init(relevant)
         lines = readCode(input)   
         # Delete comments 
         lines = [line for line in lines if '//' not in line]
@@ -79,18 +82,14 @@ class idp(IDP):
                     k=0
                     isBool = checkPredFunc(lines,relevant)
                     insertCode(lines,i,k,relevant)
-                    # printCode(lines)
-                    # print(isBool)
                 elif i == 2:
                     k=k_orig//n
                     insertCode(lines,i,k,relevant,partSol,isBool,method)
-                    # printCode(lines)
+                    printCode(lines)
+                    # exit()  
                 else:
                     k=i*k_orig//n
                     insertCode(lines,i,k,relevant,partSol,isBool,method)
-                # print('==============')
-                # print(i)
-                # print('===LINES===')
                 printCode(lines)
                 output = runCode(lines)
                 print(output)
