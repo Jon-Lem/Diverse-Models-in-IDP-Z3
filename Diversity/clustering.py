@@ -8,22 +8,33 @@ from matplotlib import pyplot as plt
 
 distcheck = 0
 
+def saveModel(output,pattern):
+    models = []
+    for line in output.split("\n"):
+        match = re.match(pattern,line)
+        if match:
+            print(line)
+            try: # If predicate
+                model = eval("[" + match.group(1) + "]")
+            except: # If function
+                model = re.findall( r'->\s*(\w+)', match.group(1))
+                # print(model)
+                # print(len(model))
+                # exit()
+            if model == []:
+                model = line.split(':=')[1].split('.')[0].strip()
+            models.append(model)
+    return models
+
 def simMatrix(output,goal):
     for k in range(len(goal)):
-        models = []
         pattern = re.escape(goal[k]) + r' := {(.*)}'
-        for line in output.split("\n"):
-            match = re.match(pattern,line)
-            if match:
-                try: # If predicate
-                    model = eval("[" + match.group(1) + "]")
-                except: # If function
-                    model = re.findall( r'->\s*(\w+)', match.group(1))
-                    # print(model)
-                    # print(len(model))
-                    # exit()
-                models.append(model)
-        # print(models)
+        models = saveModel(output,pattern)
+        if len(models) == 0:
+            pattern = re.escape(goal[k]) + r' := (.*)'
+            models = saveModel(output,pattern)
+        print(models)
+        # exit()
         if k==0:
             simMat = [[0 for _ in range(len(models))] for _ in range(len(models))]
         for i in range(len(models)):

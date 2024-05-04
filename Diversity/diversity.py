@@ -57,6 +57,7 @@ class idp(IDP):
             output = runCode(lines)
             # print(output)
             simMat = simMatrix(output,relevant)
+            # exit()
             for i in simMat:
                 print(i)
             #Clustering
