@@ -25,24 +25,31 @@ def getOrdering(input):
     # print(relevance_dict['Low'])
     return relevance_dict
 
-def convertName(types,relevant):
-    # print(types)
+def convertName(old_types,relevant):
+    # print(old_types)
+    # print(relevant)
+    types = old_types.copy()
     for i in range(len(types)):
         for j in range(len(relevant)):
             if types[i] in relevant[j]:
                 types[i] = relevant[j]
     # print(types)
     return types
-# !s1,s2 in Security: distance(s1,s2) = (if f_SecurityTypes_4_f (s1)~= f_SecurityTypes_4_f (s2) then 20 else 0).
-def distTheory(relevance_dict:dict,goal:str,relevant:str):
+
+def distTheory(relevance_dict:dict,relevant:str):
+    goal = 'solution'
     a = f'{goal}__0'
     b = f'{goal}__1'
     dist_theory = f'!{a},{b} in {goal}: distance({a},{b}) = '
     dist_theory_list = []
     for i in range(len(ordering)):
-        types = relevance_dict[ordering[i]] 
-        types = convertName(types,relevant)
+        old_types = relevance_dict[ordering[i]] 
+        # print(old_types)
+        types = convertName(old_types,relevant)
         # print(types)
+        if old_types == types:
+            print('Error: no match between keywords from file and functions')
+            exit()
         if i == 0:
             order_score = 1
         else:

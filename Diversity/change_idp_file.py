@@ -80,18 +80,8 @@ def indexEndofBlock(lines:list,index:int):
     end_theory = close
     return end_theory
 
-def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=None,dist_theory=None):
-    if method == 'Relevance' and dist_theory != None:
-        dist_voc = "distance: Security * Security -> Int"
-        target="type Security"
-        index = indexsearch(lines,target)
-        lines.insert(index+1,dist_voc)
-        target="theory"
-        index = indexsearch(lines,target)
-        end_theory = indexEndofBlock(lines,index)
-        lines.insert(end_theory,dist_theory)
-        return
-
+def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=None,dist_theory_=None):
+    # Create 'type solution'
     type_sol = "type solution := {"
     for i in range(1,n):
         type_sol += f"s{i},"
@@ -168,11 +158,11 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
         return
 
     k_voc = "k: () -> Int\n"
-    dist_voc = "distance: solution * solution -> Int"
+    dist_voc = "distance: solution * solution -> Int\n"
     k_dist_theory = " sum{{distance(solution__x,solution__y) | solution__x,solution__y in solution: solution__x ~= solution__y }}/2 >= k()."
     end = "\n"
 
-    # Update predicate/function
+    # Update predicate/function 
     dist_theory = "!solution__x,solution__y in solution: distance(solution__x,solution__y) = "   
     cardinal = []
     first = True
@@ -191,11 +181,13 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
             lines[index] = lines[index].replace("()", "solution")
             var.cte[indx] = 1
             # print(lines[index])            
-            continue
-        lines[index] = lines[index].split(':')[0] + ": solution *" + lines[index].split(':')[1]
+        else:
+            lines[index] = lines[index].split(':')[0] + ": solution *" + lines[index].split(':')[1]
         indx += 1
         # print(lines[index])
     dist_theory += "+".join(cardinal) + '.'
+    if method == 'Relevance' and dist_theory_ != None:
+        dist_theory = dist_theory_
     # print(dist_theory)
 
     lines.insert(idx,type_sol)
@@ -206,8 +198,6 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
     index = indexsearch(lines,target)
     end_theory = indexEndofBlock(lines,index)
 
-    # print(lines[index:end_theory+1])
-    # exit()
     # Update existing theory with solution type
     indx = 0
     for func in goal:

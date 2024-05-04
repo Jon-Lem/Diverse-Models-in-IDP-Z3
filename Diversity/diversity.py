@@ -41,10 +41,11 @@ class idp(IDP):
             # print(lines)
             file = 'priority.txt'
             relevance_dict = getOrdering(file)
-            dist_theory = distTheory(relevance_dict,'Security',relevant)
-            insertCode(lines,n,k,relevant,method=method,dist_theory=dist_theory)
+            dist_theory = distTheory(relevance_dict,relevant)
+            insertCode(lines,n,k,relevant,method=method,dist_theory_=dist_theory)
             printCode(lines)
             output = runCode(lines)
+            print(output)
         if method == "Ordering":
             # print(relevant)
             output = runCode(lines)

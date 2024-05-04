@@ -48,9 +48,11 @@ theory T_div:diversity {
     & worksIn(e) = IT.
 
     //Al deze lijnen apart werken niet meer samen tot een geheel?
+    //{
     //!e in Employee: dsl(e) <- salary(e) > 0.
     //!e in Employee: dsl(e) <- leads(e) ~= None.
     //!e in Employee: dsl(e) <- worksIn(e) = IT.
+    //}
 }
 sumSalary() = sum{{ salary(e) | e in Employee: dsl(e)}}.
 
