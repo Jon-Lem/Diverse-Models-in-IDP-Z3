@@ -43,6 +43,12 @@ def checkFunc(lines:list,relevant:list) -> None:
             print(f"Error: function '{relevant[i]}' could not be found")
             exit()
 
+def checkConstants(lines:list,relevant:list):
+    for i in range(len(relevant)):
+        target=f"{relevant[i]}"
+        index = indexsearch(lines,target)  
+        if '()' in lines[index]:
+            var.cte[i] = 1
 
 # Haal de belangrijkste 
 def dist_expr(relation:str,goal:str) -> str:

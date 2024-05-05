@@ -13,7 +13,7 @@ def saveModel(output,pattern):
     for line in output.split("\n"):
         match = re.match(pattern,line)
         if match:
-            print(line)
+            # print(line)
             try: # If predicate
                 model = eval("[" + match.group(1) + "]")
             except: # If function
@@ -23,8 +23,31 @@ def saveModel(output,pattern):
                 # exit()
             if model == []:
                 model = line.split(':=')[1].split('.')[0].strip()
+            # print(model)
             models.append(model)
     return models
+
+def kmeans(output,goal):
+    for k in range(len(goal)):
+            pattern = re.escape(goal[k]) + r' := {(.*)}'
+            models = saveModel(output,pattern)
+            if len(models) == 0:
+                pattern = re.escape(goal[k]) + r' := (.*)'
+                models = saveModel(output,pattern)
+            # print(models)
+            # exit()
+            if k==0:
+                simMat = [[0 for _ in range(len(models))] for _ in range(len(models))]
+            for i in range(len(models)):
+                for j in range(len(models)):
+                    # distance = len(set(models[j]) - set(models[i]))
+                    distance = sum(x != y for x, y in zip(models[i], models[j]))
+                    if k==0:
+                        simMat[i][j] = distance
+                    else:
+                        simMat[i][j] += distance
+                    # print(f"simMat[{i}][{j}] = {simMat[i][j]}")
+
 
 def simMatrix(output,goal):
     for k in range(len(goal)):
@@ -33,7 +56,7 @@ def simMatrix(output,goal):
         if len(models) == 0:
             pattern = re.escape(goal[k]) + r' := (.*)'
             models = saveModel(output,pattern)
-        print(models)
+        # print(models)
         # exit()
         if k==0:
             simMat = [[0 for _ in range(len(models))] for _ in range(len(models))]
@@ -114,29 +137,29 @@ def clusterComp(clusters:list,i:int,j:int,l:list):
 
 def clustering(simMat,k,n):
     # print(f'distance_threshold = {k//n}')
-    linkage_type ='complete'
-    best_sil = -1
-    best_model = None
-    for n_clusters in range(2,len(simMat)):
-        clusterer = AgglomerativeClustering(metric='precomputed',n_clusters=n_clusters, linkage=linkage_type)
-        model = clusterer.fit(simMat)
-        cluster_labels = model.labels_
-        silhouette_avg = silhouette_score(simMat, cluster_labels , metric="precomputed", )
-        # if (silhouette_avg < 0.17):
-        #     break
-        # print("For n_clusters =" ,n_clusters, "The average silhouette_score is :", silhouette_avg,)
-        if silhouette_avg > best_sil and n_clusters != 2:
-            best_sil = silhouette_avg
-            best_model = model
-            num_cluster = n_clusters
-    model = best_model
+    linkage_type ='single'
+    # best_sil = -1
+    # best_model = None
+    # for n_clusters in range(2,len(simMat)):
+    #     clusterer = AgglomerativeClustering(metric='precomputed',n_clusters=n_clusters, linkage=linkage_type)
+    #     model = clusterer.fit(simMat)
+    #     cluster_labels = model.labels_
+    #     silhouette_avg = silhouette_score(simMat, cluster_labels , metric="precomputed", )
+    #     # if (silhouette_avg < 0.17):
+    #     #     break
+    #     # print("For n_clusters =" ,n_clusters, "The average silhouette_score is :", silhouette_avg,)
+    #     if silhouette_avg > best_sil and n_clusters != 2:
+    #         best_sil = silhouette_avg
+    #         best_model = model
+    #         num_cluster = n_clusters
+    # model = best_model
 
-    # model = AgglomerativeClustering(
-    # metric='precomputed',
-    # n_clusters=None,
-    # distance_threshold = k//n, #Wilt dat elke cluster een afstand van 7 met elkaar heeft
-    # linkage=linkage_type
-    # ).fit(simMat)
+    model = AgglomerativeClustering(
+    metric='precomputed',
+    n_clusters=None,
+    distance_threshold = k//n, #Wilt dat elke cluster een afstand van 7 met elkaar heeft
+    linkage=linkage_type
+    ).fit(simMat)
 
     print(f" Number of clusters: {model.n_clusters_}")
     if(model.n_clusters_ == 1):

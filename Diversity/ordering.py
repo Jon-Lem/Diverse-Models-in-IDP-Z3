@@ -1,29 +1,46 @@
-import re
+import re, var
 from print import *
+from clustering import saveModel
 
-def ordering(output,goal):
+def orderModels(output,goal):
     dictlist = [dict() for _ in range(len(goal))]
     deweylist = []
+    print('===GOAL===\n',goal)
     for k in range(len(goal)):
         models = []
         dewey = []
         val = 0
         pattern = re.escape(goal[k]) + r' := {(.*)}'
-        for line in output.split("\n"):
-            match = re.match(pattern,line)
-            if match:
-                try: # If predicate
-                    model = eval("[" + match.group(1) + "]")
-                except: # If function
-                    model = re.findall( r'->\s*(\w+)', match.group(1))
-                models.append(model)
-        for i in range(len(models[0])):
+        models = saveModel(output,pattern)
+        if len(models) == 0:
+            pattern = re.escape(goal[k]) + r' := (.*)'
+            models = saveModel(output,pattern)
+            special = True
+        print('===MODELS===\n',models)
+        print(len(models))
+        print(len(models[0]))
+        if isinstance(models[0], list):
+            for i in range(len(models[0])):
+                for j in range(len(models)):
+                    try:
+                        dictlist[k][models[j][i]]
+                    except:
+                        dictlist[k][models[j][i]] = val
+                        val+=1
+        else:
             for j in range(len(models)):
+                # print('M ',models[j][i])
+                # if special:
+
+                # else:
                 try:
-                    dictlist[k][models[j][i]]
+                    dictlist[k][models[j]]
                 except:
-                    dictlist[k][models[j][i]] = val
+                    dictlist[k][models[j]] = val
                     val+=1
+        
+            # print(f'i {i} j {j} k {k} : { dictlist[k][models[j][i]]} ')
+
             # print(f'dictionary values: {dictlist[k]}')
         num = 0
         for model in models:
@@ -31,7 +48,8 @@ def ordering(output,goal):
             num+=1
             dewey.append(translate(model,dictlist[k])) 
         deweylist.append(dewey) #List of lists where each index deweylist corresponds to another function
-    # print(f'===Dict===:\n',dictlist)
+    # exit()
+    print(f'===Dict===:\n',dictlist)
     # print(len(deweylist[0]))
     print(f'===Deweylist===:\n',deweylist)
     # print(f'===DeweyEncoding===:\n')
@@ -54,8 +72,11 @@ def diversePriority(dictlist,deweylist):
 
 def translate(result,valdict):
     dewey=[]
-    for i in result:
-        dewey.append(valdict[i])
+    if isinstance(result, list):
+        for i in result:
+            dewey.append(valdict[i])
+    else:
+        dewey.append(valdict[result])
     # print(f'Result:\n {result}')
     # print(f'Dewey Encoding:\n {dewey}')
 
