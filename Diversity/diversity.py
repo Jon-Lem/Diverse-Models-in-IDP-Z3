@@ -96,7 +96,9 @@ class idp(IDP):
                 printCode(lines)
                 output = runCode(lines)
                 print(output)
-                # Collect solutions
+                if 'No models.' in output:
+                    print('Solution cannot be satisfied')
+                    exit()
                 if(i != n):
                     partSol = collectSol(output,relevant,isBool)                  
                 # Update code with new solutions
@@ -106,7 +108,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('input',type=str,help="Input IDP file")
     parser.add_argument('-n','--n',type=int,help="number of solutions")
-    parser.add_argument('-k','--k',type=int,help="total distance k")
+    parser.add_argument('-k','--k',type=float,help="total distance k")
     parser.add_argument('method',type=str,help="Method of calculating diversity, choice between: Offline, Online1, Online2, Clustering")
     parser.add_argument('goal',nargs='*', type=str ,help="target of the diversity")    
     args = parser.parse_args()

@@ -163,7 +163,7 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
         lines[index] = k_theory
         return
 
-    k_voc = "k: () -> Int\n"
+    k_voc = "k: () -> Real\n"
     dist_voc = "distance: solution * solution -> Int\n"
     k_dist_theory = " sum{{distance(solution__x,solution__y) | solution__x,solution__y in solution: solution__x ~= solution__y }}/2 >= k()."
     end = "\n"
@@ -299,6 +299,7 @@ def checkPredFunc(lines:list,relevant:list) -> Iterator[int]:
 
 def collectSol(output:str,relevant:list,isBool:list): # Neem altijd de eerste oplossing
     partSol = []
+    print(output)
     for i in range(len(relevant)):
         # print(f'rel: {relevant[i]}')
         # print('===OUTPUT===')
