@@ -11,7 +11,7 @@ relevant = ''
 
 class idp(IDP):    
     def check_method(method:str) -> bool:
-        valid_methods = ["Base", "Offline", "Online1", "Online2", "Clustering", "Ordering", "Relevance" , "Kmediods"]
+        valid_methods = ["Base", "Offline", "Online1", "Online2", "Clustering", "Ordering", "Relevance" , "Kmedoids"]
         if method in valid_methods:
             return True
         else:
@@ -54,7 +54,7 @@ class idp(IDP):
             relevant = priorityOrdering(relevant)
             # print(relevant)
             dictlist, deweylist = orderModels(output,relevant)
-        if method == "Clustering":
+        if method == "Clustering" or method == "Kmedoids":
             output = runCode(lines)
             print(output)
             simMat = simMatrix(output,relevant)
@@ -62,13 +62,7 @@ class idp(IDP):
             for i in simMat:
                 print(i)
             #Clustering
-            clustering(simMat,k,n)
-        if method == "Kmediods":
-            output = runCode(lines)
-            simMat = simMatrix(output,relevant)
-            for i in simMat:
-                print(i)
-            kmediods(simMat,n,k)
+            clustering(simMat,k,n,method)
         if method == "Offline":
             output = runCode(lines)
             # print(output)

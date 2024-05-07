@@ -54,6 +54,7 @@ def simMatrix(output,goal):
                 # print(f"simMat[{i}][{j}] = {simMat[i][j]}")
     
     return simMat
+
 def plot_dendrogram(model, **kwargs):
     # Create linkage matrix and then plot the dendrogram
 
@@ -130,44 +131,44 @@ def clusterComp(clusters:list,i:int,j:int,l:list):
     else:
         return False
 
-def kmediods(simMat,k,n):
-
-    kmedoids = KMedoids(n_clusters=n, random_state=0, metric='precomputed')
-    clusters = kmedoids.fit_predict(simMat)
-    # Print the cluster labels for each data point
-    print("Cluster Labels:")
-    print(clusters)
-
-def clustering(simMat,k,n):
+def clustering(simMat,k,n,method):
     # print(f'distance_threshold = {k//n}')
-    linkage_type ='single'
-    # best_sil = -1
-    # best_model = None
-    # for n_clusters in range(2,len(simMat)):
-    #     clusterer = AgglomerativeClustering(metric='precomputed',n_clusters=n_clusters, linkage=linkage_type)
-    #     model = clusterer.fit(simMat)
-    #     cluster_labels = model.labels_
-    #     silhouette_avg = silhouette_score(simMat, cluster_labels , metric="precomputed", )
-    #     # if (silhouette_avg < 0.17):
-    #     #     break
-    #     # print("For n_clusters =" ,n_clusters, "The average silhouette_score is :", silhouette_avg,)
-    #     if silhouette_avg > best_sil and n_clusters != 2:
-    #         best_sil = silhouette_avg
-    #         best_model = model
-    #         num_cluster = n_clusters
-    # model = best_model
+    if method == 'Clustering':
+        linkage_type ='single'
+        # best_sil = -1
+        # best_model = None
+        # for n_clusters in range(2,len(simMat)):
+        #     clusterer = AgglomerativeClustering(metric='precomputed',n_clusters=n_clusters, linkage=linkage_type)
+        #     model = clusterer.fit(simMat)
+        #     cluster_labels = model.labels_
+        #     silhouette_avg = silhouette_score(simMat, cluster_labels , metric="precomputed", )
+        #     # if (silhouette_avg < 0.17):
+        #     #     break
+        #     # print("For n_clusters =" ,n_clusters, "The average silhouette_score is :", silhouette_avg,)
+        #     if silhouette_avg > best_sil and n_clusters != 2:
+        #         best_sil = silhouette_avg
+        #         best_model = model
+        #         num_cluster = n_clusters
+        # model = best_model
 
-    model = AgglomerativeClustering(
-    metric='precomputed',
-    n_clusters=None,
-    distance_threshold = k//n, #Wilt dat elke cluster een afstand van 7 met elkaar heeft
-    linkage=linkage_type
-    ).fit(simMat)
+        model = AgglomerativeClustering(
+        metric='precomputed',
+        n_clusters=None,
+        distance_threshold = k//n, #Wilt dat elke cluster een afstand van 7 met elkaar heeft
+        linkage=linkage_type
+        ).fit(simMat)
+        print(f" Number of clusters: {model.n_clusters_}")
+        if(model.n_clusters_ == 1):
+            print('Solution is not satisfiable')
+            exit()
+        clusters = list(model.labels_)
 
-    print(f" Number of clusters: {model.n_clusters_}")
-    if(model.n_clusters_ == 1):
-        print('Solution is not satisfiable')
-        exit()
+    elif method == 'Kmedoids':
+        kmedoids = KMedoids(n_clusters=n, random_state=0, metric='precomputed')
+        clusters = kmedoids.fit_predict(simMat)
+        print("Cluster Labels:")
+        print(clusters)
+    
     # print(set(list(model.labels_)))
     # solutions = [list(model.labels_).index(x) for x in set(list(model.labels_)) ]
     # solutions = solutions[:n]
@@ -185,7 +186,6 @@ def clustering(simMat,k,n):
     # plt.show()
 
     solutions = []
-    clusters = list(model.labels_)
     for i in range(len(clusters)):
         l = []
         for j in range(len(clusters)):
