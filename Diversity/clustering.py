@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn_extra.cluster import KMedoids
 import re
 from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy.spatial.distance import squareform
@@ -27,27 +28,6 @@ def saveModel(output,pattern):
             models.append(model)
     return models
 
-def kmeans(output,goal):
-    for k in range(len(goal)):
-            pattern = re.escape(goal[k]) + r' := {(.*)}'
-            models = saveModel(output,pattern)
-            if len(models) == 0:
-                pattern = re.escape(goal[k]) + r' := (.*)'
-                models = saveModel(output,pattern)
-            # print(models)
-            # exit()
-            if k==0:
-                simMat = [[0 for _ in range(len(models))] for _ in range(len(models))]
-            for i in range(len(models)):
-                for j in range(len(models)):
-                    # distance = len(set(models[j]) - set(models[i]))
-                    distance = sum(x != y for x, y in zip(models[i], models[j]))
-                    if k==0:
-                        simMat[i][j] = distance
-                    else:
-                        simMat[i][j] += distance
-                    # print(f"simMat[{i}][{j}] = {simMat[i][j]}")
-
 
 def simMatrix(output,goal):
     for k in range(len(goal)):
@@ -56,14 +36,17 @@ def simMatrix(output,goal):
         if len(models) == 0:
             pattern = re.escape(goal[k]) + r' := (.*)'
             models = saveModel(output,pattern)
-        # print(models)
+        print(models)
         # exit()
         if k==0:
             simMat = [[0 for _ in range(len(models))] for _ in range(len(models))]
         for i in range(len(models)):
             for j in range(len(models)):
                 # distance = len(set(models[j]) - set(models[i]))
-                distance = sum(x != y for x, y in zip(models[i], models[j]))
+                if not isinstance(models[i], list):
+                    distance = 1 if models[i] != models[j] else 0
+                else:
+                    distance = sum(x != y for x, y in zip(models[i], models[j]))
                 if k==0:
                     simMat[i][j] = distance
                 else:
@@ -92,6 +75,18 @@ def plot_dendrogram(model, **kwargs):
 
     # Plot the corresponding dendrogram
     dendrogram(linkage_matrix, **kwargs)
+
+def translate(result,valdict):
+    dewey=[]
+    if isinstance(result, list):
+        for i in result:
+            dewey.append(valdict[i])
+    else:
+        dewey.append(valdict[result])
+    # print(f'Result:\n {result}')
+    # print(f'Dewey Encoding:\n {dewey}')
+
+    return dewey
 
 def distCheck(simMat,solutions,k):
     # print(solutions)
@@ -134,6 +129,14 @@ def clusterComp(clusters:list,i:int,j:int,l:list):
         return True
     else:
         return False
+
+def kmediods(simMat,k,n):
+
+    kmedoids = KMedoids(n_clusters=n, random_state=0, metric='precomputed')
+    clusters = kmedoids.fit_predict(simMat)
+    # Print the cluster labels for each data point
+    print("Cluster Labels:")
+    print(clusters)
 
 def clustering(simMat,k,n):
     # print(f'distance_threshold = {k//n}')

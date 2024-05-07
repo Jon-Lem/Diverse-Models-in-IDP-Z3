@@ -5,8 +5,8 @@ from clustering import saveModel
 def orderModels(output,goal):
     dictlist = [dict() for _ in range(len(goal))]
     deweylist = []
-    print('===GOAL===\n',goal)
     for k in range(len(goal)):
+        print('===GOAL===\n',goal[k])
         models = []
         dewey = []
         val = 0
@@ -15,10 +15,7 @@ def orderModels(output,goal):
         if len(models) == 0:
             pattern = re.escape(goal[k]) + r' := (.*)'
             models = saveModel(output,pattern)
-            special = True
         print('===MODELS===\n',models)
-        print(len(models))
-        print(len(models[0]))
         if isinstance(models[0], list):
             for i in range(len(models[0])):
                 for j in range(len(models)):
@@ -29,18 +26,12 @@ def orderModels(output,goal):
                         val+=1
         else:
             for j in range(len(models)):
-                # print('M ',models[j][i])
-                # if special:
-
-                # else:
                 try:
                     dictlist[k][models[j]]
                 except:
                     dictlist[k][models[j]] = val
                     val+=1
-        
             # print(f'i {i} j {j} k {k} : { dictlist[k][models[j][i]]} ')
-
             # print(f'dictionary values: {dictlist[k]}')
         num = 0
         for model in models:
