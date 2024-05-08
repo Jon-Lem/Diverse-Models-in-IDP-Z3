@@ -11,7 +11,7 @@ relevant = ''
 
 class idp(IDP):    
     def check_method(method:str) -> bool:
-        valid_methods = ["Base", "Offline", "Online1", "Online2", "Clustering", "Ordering", "Relevance" , "Kmeans"]
+        valid_methods = ["Base", "Offline", "Online1", "Online2", "Clustering", "Ordering", "Relevance" , "Kmedoids"]
         if method in valid_methods:
             return True
         else:
@@ -54,18 +54,15 @@ class idp(IDP):
             relevant = priorityOrdering(relevant)
             # print(relevant)
             dictlist, deweylist = orderModels(output,relevant)
-        if method == "Clustering":
+        if method == "Clustering" or method == "Kmedoids":
             output = runCode(lines)
-            # print(output)
+            print(output)
             simMat = simMatrix(output,relevant)
             # exit()
             for i in simMat:
                 print(i)
             #Clustering
-            clustering(simMat,k,n)
-        if method == "Kmeans":
-            output = runCode(lines)
-            kmeans(output,relevant)
+            clustering(simMat,k,n,method)
         if method == "Offline":
             output = runCode(lines)
             # print(output)
@@ -89,17 +86,21 @@ class idp(IDP):
                     isBool = checkPredFunc(lines,relevant)
                     insertCode(lines,i,k,relevant)
                 elif i == 2:
-                    k=k_orig//n
+                    # k=k_orig//n
+                    k = k_orig*i*(i-1)/(n*(n-1)) 
                     insertCode(lines,i,k,relevant,partSol,isBool,method)
                     printCode(lines)
                     # exit()  
                 else:
-                    k=i*k_orig//n
+                    # k=i*k_orig//n
+                    k = k_orig*i*(i-1)/(n*(n-1)) 
                     insertCode(lines,i,k,relevant,partSol,isBool,method)
                 printCode(lines)
                 output = runCode(lines)
                 print(output)
-                # Collect solutions
+                if 'No models.' in output:
+                    print('Solution cannot be satisfied')
+                    exit()
                 if(i != n):
                     partSol = collectSol(output,relevant,isBool)                  
                 # Update code with new solutions
@@ -109,7 +110,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('input',type=str,help="Input IDP file")
     parser.add_argument('-n','--n',type=int,help="number of solutions")
-    parser.add_argument('-k','--k',type=int,help="total distance k")
+    parser.add_argument('-k','--k',type=float,help="total distance k")
     parser.add_argument('method',type=str,help="Method of calculating diversity, choice between: Offline, Online1, Online2, Clustering")
     parser.add_argument('goal',nargs='*', type=str ,help="target of the diversity")    
     args = parser.parse_args()
