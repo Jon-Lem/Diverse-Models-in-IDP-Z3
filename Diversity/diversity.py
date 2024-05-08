@@ -86,12 +86,14 @@ class idp(IDP):
                     isBool = checkPredFunc(lines,relevant)
                     insertCode(lines,i,k,relevant)
                 elif i == 2:
-                    k=k_orig//n
+                    # k=k_orig//n
+                    k = k_orig*i*(i-1)/(n*(n-1)) 
                     insertCode(lines,i,k,relevant,partSol,isBool,method)
                     printCode(lines)
                     # exit()  
                 else:
-                    k=i*k_orig//n
+                    # k=i*k_orig//n
+                    k = k_orig*i*(i-1)/(n*(n-1)) 
                     insertCode(lines,i,k,relevant,partSol,isBool,method)
                 printCode(lines)
                 output = runCode(lines)
