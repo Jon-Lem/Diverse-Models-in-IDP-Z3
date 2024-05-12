@@ -1,4 +1,5 @@
 import numpy as np
+import itertools
 from sklearn_extra.cluster import KMedoids
 import re
 from scipy.cluster.hierarchy import dendrogram, linkage
@@ -36,7 +37,7 @@ def simMatrix(output,goal):
         if len(models) == 0:
             pattern = re.escape(goal[k]) + r' := (.*)'
             models = saveModel(output,pattern)
-        print(models)
+        # print(models)
         # exit()
         if k==0:
             simMat = [[0 for _ in range(len(models))] for _ in range(len(models))]
@@ -54,6 +55,29 @@ def simMatrix(output,goal):
                 # print(f"simMat[{i}][{j}] = {simMat[i][j]}")
     
     return simMat
+
+def searchNKmodels(simMat,n,k):
+
+    n_models = len(simMat)
+    # Generate all combinations of four points
+    combinations = itertools.combinations(range(n_models), n)
+    # print(combinations)
+    # Iterate through each combination
+    for combo in combinations:
+        # print(combo)
+        total_distance = 0
+        # Calculate the total distance among the four points
+        for i in range(n-1):
+            for j in range(i + 1, n):
+                total_distance += simMat[combo[i]][combo[j]]
+        
+        # If the total distance matches the target distance, return the combination
+        if total_distance/2 >= k:
+            return combo
+    
+    # If no such combination is found, return None
+    return None
+
 
 def plot_dendrogram(model, **kwargs):
     # Create linkage matrix and then plot the dendrogram
