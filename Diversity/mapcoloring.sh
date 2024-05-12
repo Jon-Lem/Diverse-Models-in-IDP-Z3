@@ -1,7 +1,7 @@
 #!/bin/bash
 
 start_time=$(date +%s)
-methods=("Online1" "Online2" "Clustering")
+methods=("Offline" "Online1" "Online2" "Clustering" "Kmedoids")
 nk_values=("3,117" "4,234" "6,475")
 k_percent=("0.6" "0.8" "0.9" "1")
 
