@@ -11,7 +11,7 @@ relevant = ''
 
 class idp(IDP):    
     def check_method(method:str) -> bool:
-        valid_methods = ["Base", "Offline", "Online1", "Online2", "Clustering", "Ordering", "Relevance" , "Kmedoids"]
+        valid_methods = ["Base", "Offline", "Online1", "Online2", "Clustering", "Kmedoids", "Relevance", "Ordering" ]
         if method in valid_methods:
             return True
         else:
