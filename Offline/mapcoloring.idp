@@ -12,6 +12,8 @@ vocabulary {
 
   distance: solution * solution -> Int
 
+  k_distance: solution * solution -> Bool
+
   edge: solution * solution -> Int
 
   k: () -> Int
@@ -28,13 +30,12 @@ theory T:V {
 n() = 4.
 k() = 12.
 
-//!x,y in solution: edge(x,y) = 0.
-//{
-//!x,y in solution: edge(x,y) = distance(x,y) <- distance(x,y) >= k()/n().
-//}
-//!x,y in solution: (distance(x,y) > 3) => edge(x,y) = 66.
-!x,y in solution: edge(x,y) = if(distance(x,y) >= k()/n() then (distance(x,y)) else 0).
-//!x,y in solution: ( edge(x,y) = distance(x,y) ) <=> ( distance(x,y) >= k() / n() ).
+!x,y in solution: k_distance(x,y) => (distance(x,y) >= (k()/n())).
+#{x,y in solution: k_distance(x,y)} = n().
+sum{{distance(solution__x,solution__y) | solution__x,solution__y in solution: k_distance(solution__x,solution__y) }}/2 >= k().
+!x,y in solution: edge(x,y) = if(k_distance(x,y)) then (distance(x,y)) else 0.
+
+//!x,y in solution: edge(x,y) = if(distance(x,y) >= (k()/n()) & #{u,v in solution: edge(u,v) = distance(u,v)} < n()+1) then (distance(x,y)) else 0.
 //#{x,y in solution: edge(x,y) = distance(x,y)} = n().
 
 
