@@ -114,15 +114,14 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
                 target="model_expand"
                 for l in range(len(lines)):
                     if target in lines[l]:
-                        print(lines[l])
+                        # print(lines[l])
                         comma_idx = indexsearch(lines[l],',')
                         if(comma_idx != -1):
                             lines[l] = lines[l][:comma_idx] + ',S' + lines[l][comma_idx:]
                         else:
                             comma_idx = indexsearch(lines[l],')')
                             lines[l] = lines[l][:comma_idx] + ',S' + lines[l][comma_idx:]
-                        print(lines[l])
-                exit()
+                        # print(lines[l])
             end_struct = indexsearch(lines[begin_struct:],"}") + begin_struct
             target="theory"
             begin_theory = indexsearch(lines,target)
