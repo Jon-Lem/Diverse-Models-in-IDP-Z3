@@ -1,2 +1,2 @@
-sklearn_extra
-
+scikit-learn-extra
+idp-engine
