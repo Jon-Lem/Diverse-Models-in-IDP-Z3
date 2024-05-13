@@ -30,7 +30,7 @@ for idp_file in "${idp_files[@]}"; do
                 echo "Executing: python3 diversity.py ../Base/$idp_file -n \"$n\" -k \"$actual_k\" \"$method\""
                 output=$(python3 diversity.py ../Base/$idp_file -n "$n" -k "$actual_k" "$method")
                 time=$(echo "$output" | grep -o '[0-9]\+\.[0-9]\+ seconds')
-                echo -n " & ${time:-Not Available}" >> ../Results/results.txt
+                echo -n " & ${time:-X}" >> ../Results/results.txt
 
                 echo "=============================="
             done

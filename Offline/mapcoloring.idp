@@ -12,9 +12,9 @@ vocabulary {
 
   distance: solution * solution -> Int
 
-  k_distance: solution * solution -> Bool
+  //k_distance: solution * solution -> Bool
 
-  edge: solution * solution -> Int
+  //edge: solution * solution -> Int
 
   k: () -> Int
   n: () -> Int
@@ -25,14 +25,14 @@ theory T:V {
 
  !solution__0 in solution: !x,y in country: Bordering(x,y) =>  ColourOf(solution__0, x) ~=  ColourOf(solution__0, y).  
  !solution__x,solution__y in solution: distance(solution__x,solution__y) = #{country__0 in country: ColourOf(solution__x,country__0) ~= ColourOf(solution__y,country__0)}.
- //sum{{distance(solution__x,solution__y) | solution__x,solution__y in solution: solution__x ~= solution__y }}/2 >= k().
+ sum{{distance(solution__x,solution__y) | solution__x,solution__y in solution: solution__x ~= solution__y }}/2 >= k().
 
-n() = 4.
-k() = 12.
+n() = 3.
+k() = 117.
 
 //!x,y in solution: k_distance(x) = y => (distance(x,y) >= (k()/n())).
-#{x,y in solution: k_distance(x,y)} = n().
-sum{{distance(solution__x,solution__y) | solution__x,solution__y in solution: k_distance(solution__x,solution__y) }}/2 >= k().
+//#{x,y in solution: k_distance(x,y)} = n().
+//sum{{distance(solution__x,solution__y) | solution__x,solution__y in solution: k_distance(solution__x,solution__y) }}/2 >= k().
 //!x,y in solution: edge(x,y) = if(k_distance(x,y)) then (distance(x,y)) else 0.
 
 //!x,y in solution: edge(x,y) = if(distance(x,y) >= (k()/n()) & #{u,v in solution: edge(u,v) = distance(u,v)} < n()+1) then (distance(x,y)) else 0.

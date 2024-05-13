@@ -63,16 +63,23 @@ def searchNKmodels(simMat,n,k):
     combinations = itertools.combinations(range(n_models), n)
     # print(combinations)
     # Iterate through each combination
+    best_dist =0
     for combo in combinations:
         # print(combo)
-        total_distance = 0
+        total_distance = 0        
         # Calculate the total distance among the four points
-        for i in range(n-1):
-            for j in range(i + 1, n):
+        for i in range(n):
+            for j in range(n):
+                # print(f'Combination: {combo[i]} {combo[j]} : Distance: {simMat[combo[i]][combo[j]]}')
                 total_distance += simMat[combo[i]][combo[j]]
-        
+        # print(combo)
+        # print('Total Distance:',total_distance/2)
+        if total_distance/2 > best_dist:
+            best_dist = total_distance/2
+            print('Current Best Total Distance:',best_dist)
         # If the total distance matches the target distance, return the combination
         if total_distance/2 >= k:
+            print('Best Total Distance:',total_distance/2)
             return combo
     
     # If no such combination is found, return None
@@ -178,7 +185,7 @@ def clustering(simMat,k,n,method):
         model = AgglomerativeClustering(
         metric='precomputed',
         n_clusters=None,
-        distance_threshold = k//n, #Wilt dat elke cluster een afstand van 7 met elkaar heeft
+        distance_threshold = k//((n-1)*n*0.5), #Wilt dat elke cluster een afstand van 7 met elkaar heeft
         linkage=linkage_type
         ).fit(simMat)
         print(f" Number of clusters: {model.n_clusters_}")
