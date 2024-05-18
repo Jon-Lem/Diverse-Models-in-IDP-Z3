@@ -354,6 +354,7 @@ def collectBaseSol(lines:list,output:str,relevant:list,isBool:list) -> tuple[int
             partSol.append("\n")
             continue
         n = 0
+        # If already in the struct change it to partial interpretations
         partsol = f'{relevant[i]} >> {{' if isBool[i] == 0 else ''
         for line in output.split('\n'):
             target = "Model"
@@ -382,6 +383,7 @@ def collectBaseSol(lines:list,output:str,relevant:list,isBool:list) -> tuple[int
                     match = re.findall(result_pattern,line)
                     formatted_tuples = [f"(s{n},{domain}) -> {range}" for domain,range in match]
                     # print(formatted_tuples)
+                    #If it is a variable
                     if formatted_tuples == []:
                         range_ = line.split(':=')[1].strip().strip('.')
                         part_sol = f's{n} -> {range_}'
@@ -394,6 +396,7 @@ def collectBaseSol(lines:list,output:str,relevant:list,isBool:list) -> tuple[int
         if partsol.strip() == '':
             partSol.append(partsol)
             continue
+        # Remove the space and the symbol
         partsol = partsol[:-2]+ '}.' if isBool[i] == 0 else  partsol[:-2]+'.'
         partSol.append(partsol)
         # print(partSol)

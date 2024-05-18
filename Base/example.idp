@@ -1,0 +1,26 @@
+vocabulary {
+  type country := {Belgium, France, Germany, Luxembourg, Netherlands}
+  type colour := {Red, Blue, Green, Yellow}
+  Bordering : country * country -> Bool
+  ColourOf : country -> colour
+}
+
+structure {
+  Bordering := {(Belgium, Netherlands), (Belgium, Germany), 
+    (Belgium, Luxembourg), (Belgium, France), (France, Belgium), 
+    (France, Luxembourg), (France, Germany), (Germany, France), 
+    (Germany, Luxembourg), (Germany, Belgium), (Germany, Netherlands), 
+    (Luxembourg, Belgium), (Luxembourg, Germany), (Luxembourg, France), 
+    (Netherlands, Germany), (Netherlands, Belgium)}.
+}
+
+theory T:V {
+
+ !x,y in country: Bordering(x,y) =>  ColourOf(x) ~=  ColourOf(y).  
+  
+}
+
+procedure main() {
+    pretty_print(model_expand(T, S, max=50, timeout_seconds=0))
+
+}
