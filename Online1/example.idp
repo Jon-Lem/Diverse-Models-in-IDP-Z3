@@ -1,0 +1,31 @@
+vocabulary {
+  type country := {Belgium, France, Germany, Luxembourg, Netherlands}
+  type colour := {Red, Blue, Green, Yellow}
+  type solution := {s1,s2,s3}
+  Bordering : solution * country * country -> Bool
+  ColourOf : solution * country -> colour
+distance: solution * solution -> Int
+k: () -> Real
+}
+
+
+
+structure {
+Bordering := {(s1,Belgium, Netherlands),(s1,Belgium, Germany),(s1,Belgium, Luxembourg),(s1,Belgium, France),(s1,France, Belgium),(s1,France, Luxembourg),(s1,France, Germany),(s1,Germany, France),(s1,Germany, Luxembourg),(s1,Germany, Belgium),(s1,Germany, Netherlands),(s1,Luxembourg, Belgium),(s1,Luxembourg, Germany),(s1,Luxembourg, France),(s1,Netherlands, Germany),(s1,Netherlands, Belgium),(s2,Belgium, Netherlands),(s2,Belgium, Germany),(s2,Belgium, Luxembourg),(s2,Belgium, France),(s2,France, Belgium),(s2,France, Luxembourg),(s2,France, Germany),(s2,Germany, France),(s2,Germany, Luxembourg),(s2,Germany, Belgium),(s2,Germany, Netherlands),(s2,Luxembourg, Belgium),(s2,Luxembourg, Germany),(s2,Luxembourg, France),(s2,Netherlands, Germany),(s2,Netherlands, Belgium),(s3,Belgium, Netherlands),(s3,Belgium, Germany),(s3,Belgium, Luxembourg),(s3,Belgium, France),(s3,France, Belgium),(s3,France, Luxembourg),(s3,France, Germany),(s3,Germany, France),(s3,Germany, Luxembourg),(s3,Germany, Belgium),(s3,Germany, Netherlands),(s3,Luxembourg, Belgium),(s3,Luxembourg, Germany),(s3,Luxembourg, France),(s3,Netherlands, Germany),(s3,Netherlands, Belgium)}.
+}
+
+
+
+theory T:V {
+
+!solution__0 in solution: !x,y in country: Bordering(solution__0, x,y) =>  ColourOf(solution__0, x) ~=  ColourOf(solution__0, y).  
+!solution__x,solution__y in solution: distance(solution__x,solution__y) = #{country__0,country__1 in country: Bordering(solution__x,country__0,country__1) ~= Bordering(solution__y,country__0,country__1)}/2+#{country__0 in country: ColourOf(solution__x,country__0) ~= ColourOf(solution__y,country__0)}.
+ sum{{distance(solution__x,solution__y) | solution__x,solution__y in solution: solution__x ~= solution__y }}/2 >= k().
+k() = 20.0.
+}
+
+
+
+procedure main() {
+    pretty_print(model_expand(T, S, max=50, timeout_seconds=0))
+}

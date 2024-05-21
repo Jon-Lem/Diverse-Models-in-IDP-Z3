@@ -6,12 +6,7 @@ vocabulary {
 }
 
 structure {
-  Bordering := {(Belgium, Netherlands), (Belgium, Germany), 
-    (Belgium, Luxembourg), (Belgium, France), (France, Belgium), 
-    (France, Luxembourg), (France, Germany), (Germany, France), 
-    (Germany, Luxembourg), (Germany, Belgium), (Germany, Netherlands), 
-    (Luxembourg, Belgium), (Luxembourg, Germany), (Luxembourg, France), 
-    (Netherlands, Germany), (Netherlands, Belgium)}.
+  Bordering := {(Belgium, Netherlands), (Belgium, Germany), (Belgium, Luxembourg), (Belgium, France), (France, Belgium), (France, Luxembourg), (France, Germany), (Germany, France), (Germany, Luxembourg), (Germany, Belgium), (Germany, Netherlands), (Luxembourg, Belgium), (Luxembourg, Germany), (Luxembourg, France), (Netherlands, Germany), (Netherlands, Belgium)}.
 }
 
 theory T:V {

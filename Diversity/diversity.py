@@ -90,21 +90,13 @@ class idp(IDP):
             output = runCode(lines)
             print(output)
         if method == "Online2":
-            k_orig = k
+            total_k = k
             for i in range(1,n+1):
+                k = total_k*i*(i-1)/(n*(n-1)) 
                 if i == 1:
-                    k=0
                     isBool = checkPredFunc(lines,relevant)
-                    insertCode(lines,i,k,relevant)
-                elif i == 2:
-                    # k=k_orig//n
-                    k = k_orig*i*(i-1)/(n*(n-1)) 
-                    insertCode(lines,i,k,relevant,partSol,isBool,method)
-                    printCode(lines)
-                    # exit()  
+                    insertCode(lines,i,k,relevant) 
                 else:
-                    # k=i*k_orig//n
-                    k = k_orig*i*(i-1)/(n*(n-1)) 
                     insertCode(lines,i,k,relevant,partSol,isBool,method)
                 printCode(lines)
                 output = runCode(lines)

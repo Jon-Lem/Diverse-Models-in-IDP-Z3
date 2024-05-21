@@ -165,7 +165,7 @@ def clusterComp(clusters:list,i:int,j:int,l:list):
 def clustering(simMat,k,n,method):
     # print(f'distance_threshold = {k//n}')
     if method == 'Clustering':
-        linkage_type ='single'
+        linkage_type ='complete'
         # best_sil = -1
         # best_model = None
         # for n_clusters in range(2,len(simMat)):
@@ -181,7 +181,7 @@ def clustering(simMat,k,n,method):
         #         best_model = model
         #         num_cluster = n_clusters
         # model = best_model
-
+        print(k//((n-1)*n*0.5))
         model = AgglomerativeClustering(
         metric='precomputed',
         n_clusters=None,

@@ -23,17 +23,7 @@ n: () -> Int
 structure {
 
 ColourOf >> {(s1,Belgium) -> Yellow, (s1,France) -> Green, (s1,Germany) -> Blue, (s1,Luxembourg) -> Red, (s1,Netherlands) -> Red , (s2,Belgium) -> Green, (s2,France) -> Red, (s2,Germany) -> Yellow, (s2,Luxembourg) -> Blue, (s2,Netherlands) -> Red , (s3,Belgium) -> Green, (s3,France) -> Blue, (s3,Germany) -> Red, (s3,Luxembourg) -> Yellow, (s3,Netherlands) -> Yellow , (s4,Belgium) -> Green, (s4,France) -> Red, (s4,Germany) -> Blue, (s4,Luxembourg) -> Yellow, (s4,Netherlands) -> Yellow , (s5,Belgium) -> Green, (s5,France) -> Red, (s5,Germany) -> Blue, (s5,Luxembourg) -> Yellow, (s5,Netherlands) -> Red , (s6,Belgium) -> Blue, (s6,France) -> Red, (s6,Germany) -> Green, (s6,Luxembourg) -> Yellow, (s6,Netherlands) -> Yellow , (s7,Belgium) -> Blue, (s7,France) -> Red, (s7,Germany) -> Green, (s7,Luxembourg) -> Yellow, (s7,Netherlands) -> Red , (s8,Belgium) -> Red, (s8,France) -> Blue, (s8,Germany) -> Green, (s8,Luxembourg) -> Yellow, (s8,Netherlands) -> Yellow , (s9,Belgium) -> Red, (s9,France) -> Blue, (s9,Germany) -> Green, (s9,Luxembourg) -> Yellow, (s9,Netherlands) -> Blue , (s10,Belgium) -> Blue, (s10,France) -> Green, (s10,Germany) -> Red, (s10,Luxembourg) -> Yellow, (s10,Netherlands) -> Green , (s11,Belgium) -> Red, (s11,France) -> Green, (s11,Germany) -> Blue, (s11,Luxembourg) -> Yellow, (s11,Netherlands) -> Green , (s12,Belgium) -> Green, (s12,France) -> Blue, (s12,Germany) -> Red, (s12,Luxembourg) -> Yellow, (s12,Netherlands) -> Blue , (s13,Belgium) -> Blue, (s13,France) -> Green, (s13,Germany) -> Red, (s13,Luxembourg) -> Yellow, (s13,Netherlands) -> Yellow , (s14,Belgium) -> Red, (s14,France) -> Green, (s14,Germany) -> Blue, (s14,Luxembourg) -> Yellow, (s14,Netherlands) -> Yellow , (s15,Belgium) -> Yellow, (s15,France) -> Blue, (s15,Germany) -> Red, (s15,Luxembourg) -> Green, (s15,Netherlands) -> Blue , (s16,Belgium) -> Yellow, (s16,France) -> Blue, (s16,Germany) -> Red, (s16,Luxembourg) -> Green, (s16,Netherlands) -> Green , (s17,Belgium) -> Yellow, (s17,France) -> Red, (s17,Germany) -> Blue, (s17,Luxembourg) -> Green, (s17,Netherlands) -> Red , (s18,Belgium) -> Yellow, (s18,France) -> Red, (s18,Germany) -> Blue, (s18,Luxembourg) -> Green, (s18,Netherlands) -> Green , (s19,Belgium) -> Yellow, (s19,France) -> Blue, (s19,Germany) -> Green, (s19,Luxembourg) -> Red, (s19,Netherlands) -> Blue , (s20,Belgium) -> Yellow, (s20,France) -> Blue, (s20,Germany) -> Green, (s20,Luxembourg) -> Red, (s20,Netherlands) -> Red , (s21,Belgium) -> Yellow, (s21,France) -> Red, (s21,Germany) -> Green, (s21,Luxembourg) -> Blue, (s21,Netherlands) -> Blue , (s22,Belgium) -> Yellow, (s22,France) -> Red, (s22,Germany) -> Green, (s22,Luxembourg) -> Blue, (s22,Netherlands) -> Red , (s23,Belgium) -> Yellow, (s23,France) -> Green, (s23,Germany) -> Red, (s23,Luxembourg) -> Blue, (s23,Netherlands) -> Blue , (s24,Belgium) -> Yellow, (s24,France) -> Green, (s24,Germany) -> Blue, (s24,Luxembourg) -> Red, (s24,Netherlands) -> Green , (s25,Belgium) -> Yellow, (s25,France) -> Green, (s25,Germany) -> Red, (s25,Luxembourg) -> Blue, (s25,Netherlands) -> Green , (s26,Belgium) -> Green, (s26,France) -> Blue, (s26,Germany) -> Yellow, (s26,Luxembourg) -> Red, (s26,Netherlands) -> Red , (s27,Belgium) -> Green, (s27,France) -> Red, (s27,Germany) -> Yellow, (s27,Luxembourg) -> Blue, (s27,Netherlands) -> Blue , (s28,Belgium) -> Green, (s28,France) -> Blue, (s28,Germany) -> Yellow, (s28,Luxembourg) -> Red, (s28,Netherlands) -> Blue , (s29,Belgium) -> Red, (s29,France) -> Blue, (s29,Germany) -> Yellow, (s29,Luxembourg) -> Green, (s29,Netherlands) -> Blue , (s30,Belgium) -> Blue, (s30,France) -> Red, (s30,Germany) -> Yellow, (s30,Luxembourg) -> Green, (s30,Netherlands) -> Red , (s31,Belgium) -> Blue, (s31,France) -> Red, (s31,Germany) -> Yellow, (s31,Luxembourg) -> Green, (s31,Netherlands) -> Green , (s32,Belgium) -> Red, (s32,France) -> Blue, (s32,Germany) -> Yellow, (s32,Luxembourg) -> Green, (s32,Netherlands) -> Green , (s33,Belgium) -> Blue, (s33,France) -> Yellow, (s33,Germany) -> Green, (s33,Luxembourg) -> Red, (s33,Netherlands) -> Yellow , (s34,Belgium) -> Blue, (s34,France) -> Yellow, (s34,Germany) -> Green, (s34,Luxembourg) -> Red, (s34,Netherlands) -> Red , (s35,Belgium) -> Red, (s35,France) -> Yellow, (s35,Germany) -> Blue, (s35,Luxembourg) -> Green, (s35,Netherlands) -> Yellow , (s36,Belgium) -> Red, (s36,France) -> Yellow, (s36,Germany) -> Green, (s36,Luxembourg) -> Blue, (s36,Netherlands) -> Yellow , (s37,Belgium) -> Red, (s37,France) -> Yellow, (s37,Germany) -> Green, (s37,Luxembourg) -> Blue, (s37,Netherlands) -> Blue , (s38,Belgium) -> Green, (s38,France) -> Yellow, (s38,Germany) -> Red, (s38,Luxembourg) -> Blue, (s38,Netherlands) -> Yellow , (s39,Belgium) -> Green, (s39,France) -> Yellow, (s39,Germany) -> Red, (s39,Luxembourg) -> Blue, (s39,Netherlands) -> Blue , (s40,Belgium) -> Blue, (s40,France) -> Yellow, (s40,Germany) -> Red, (s40,Luxembourg) -> Green, (s40,Netherlands) -> Yellow , (s41,Belgium) -> Green, (s41,France) -> Yellow, (s41,Germany) -> Blue, (s41,Luxembourg) -> Red, (s41,Netherlands) -> Yellow , (s42,Belgium) -> Green, (s42,France) -> Yellow, (s42,Germany) -> Blue, (s42,Luxembourg) -> Red, (s42,Netherlands) -> Red , (s43,Belgium) -> Blue, (s43,France) -> Yellow, (s43,Germany) -> Red, (s43,Luxembourg) -> Green, (s43,Netherlands) -> Green , (s44,Belgium) -> Red, (s44,France) -> Yellow, (s44,Germany) -> Blue, (s44,Luxembourg) -> Green, (s44,Netherlands) -> Green , (s45,Belgium) -> Blue, (s45,France) -> Green, (s45,Germany) -> Yellow, (s45,Luxembourg) -> Red, (s45,Netherlands) -> Red , (s46,Belgium) -> Blue, (s46,France) -> Green, (s46,Germany) -> Yellow, (s46,Luxembourg) -> Red, (s46,Netherlands) -> Green , (s47,Belgium) -> Red, (s47,France) -> Green, (s47,Germany) -> Yellow, (s47,Luxembourg) -> Blue, (s47,Netherlands) -> Blue , (s48,Belgium) -> Red, (s48,France) -> Green, (s48,Germany) -> Yellow, (s48,Luxembourg) -> Blue, (s48,Netherlands) -> Green }.
-  Bordering := {(Belgium, Netherlands), (Belgium, Germany), 
-
-    (Belgium, Luxembourg), (Belgium, France), (France, Belgium), 
-
-    (France, Luxembourg), (France, Germany), (Germany, France), 
-
-    (Germany, Luxembourg), (Germany, Belgium), (Germany, Netherlands), 
-
-    (Luxembourg, Belgium), (Luxembourg, Germany), (Luxembourg, France), 
-
-    (Netherlands, Germany), (Netherlands, Belgium)}.
+Bordering := {(Belgium, Netherlands), (Belgium, Germany), (Belgium, Luxembourg), (Belgium, France), (France, Belgium), (France, Luxembourg), (France, Germany), (Germany, France), (Germany, Luxembourg), (Germany, Belgium), (Germany, Netherlands), (Luxembourg, Belgium), (Luxembourg, Germany), (Luxembourg, France), (Netherlands, Germany), (Netherlands, Belgium)}.
 
 }
 
@@ -41,20 +31,14 @@ ColourOf >> {(s1,Belgium) -> Yellow, (s1,France) -> Green, (s1,Germany) -> Blue,
 
 theory T:V {
 
-
-
 !solution__0 in solution: !x,y in country: Bordering(x,y) =>  ColourOf(solution__0, x) ~=  ColourOf(solution__0, y).  
-
 !solution__x,solution__y in solution: distance(solution__x,solution__y) = #{country__0 in country: ColourOf(solution__x,country__0) ~= ColourOf(solution__y,country__0)}.
-
- sum{{distance(solution__x,solution__y) | solution__x,solution__y in solution: solution__x ~= solution__y }}/2 >= k().
+sum{{distance(solution__x,solution__y) | solution__x,solution__y in k_dist_set: solution__x ~= solution__y }}/2 >= k().
 
 n() = 3.
 k() = 20.0.
 
-
 #{x in solution: k_dist_set(x)} = n().
-
 
 }
 
