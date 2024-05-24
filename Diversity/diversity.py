@@ -124,7 +124,6 @@ def main():
     goal = args.goal 
     method = args.method 
     # print(f"arguments: {input} {n} {k} {goal} {method}")   
-    # result = idp.check_args(input,method,goal)
     result = idp.check_args(input,method,goal)
     if result:
         goal = result
