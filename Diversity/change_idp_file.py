@@ -194,7 +194,6 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
     cardinal = []
     first = True
     idx=0
-    indx = 0
     for i in range(len(goal)):
         # Search for relevant function/variable in the vocabulary
         target=f"{goal[i]}"
@@ -222,6 +221,9 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
 
     # Insert the new vocabulary lines
     lines.insert(idx,type_sol)
+    if method == 'Offline':
+        lines.insert(index+2,'k_dist_set: solution-> Bool\n')
+        lines.insert(index+2,'n: () -> Int\n')
     lines.insert(index+2,k_voc)
     lines.insert(index+2,dist_voc)
 
@@ -249,6 +251,9 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
     index = j
 
     # Insert the k and distance theory lines
+    if method == 'Offline':
+        lines.insert(index+1,'#{solution__0 in solution: k_dist_set(solution__0)} = n().\n')
+        lines.insert(index+1,f'n() = {n}.\n')
     lines.insert(index+1,k_theory)
     lines.insert(index+1,k_dist_theory)
     lines.insert(index+1,dist_theory)
@@ -280,7 +285,7 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
             formatted_tuples += [f"(s{j},{t})" for t in tuples]
         # print(formatted_tuples)
         func_struct = ",".join(formatted_tuples)
-        lines[index] = f"{goal[j]} := {{" + func_struct + "}."  
+        lines[index] = f"{goal[i]} := {{" + func_struct + "}."  
     # printCode(lines)
     # exit()
 

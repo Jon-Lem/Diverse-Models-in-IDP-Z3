@@ -66,17 +66,6 @@ class idp(IDP):
         if method == "Offline":
             output = runCode(lines)
             print(output)
-
-            # simMat = simMatrix(output,relevant)
-            # # for i in simMat:
-            # #     print(i)
-            # # print(simMat[0])
-            # combo = searchNKmodels(simMat,n,k)
-            # if combo == None:
-            #     print('Solution is not satisfiable')
-            #     exit()
-            # print(list(combo))
-            # prettyPrint(simMat,list(combo),k)
             isBool = checkPredFunc(lines,relevant)
             n,partSol = collectBaseSol(lines,output,relevant,isBool)
             insertCode(lines,n,k,relevant,partSol,isBool,method)
