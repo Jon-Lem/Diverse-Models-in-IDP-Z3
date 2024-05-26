@@ -52,8 +52,7 @@ def checkConstants(lines:list,relevant:list):
 
 # Haal de belangrijkste 
 def dist_expr(relation:str,goal:str) -> str:
-    relation = relation.split("->")[0].strip()
-    relation = relation.split("*")
+    relation = relation.split("->")[0].strip().split("*")
     relation= [i.strip() for i in relation]
     relation = [(x,relation.count(x)) for x in set(relation)]
     dist_theory = ''
@@ -92,6 +91,8 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
     for i in range(1,n):
         type_sol += f"s{i},"
     type_sol+=f"s{n}" + "}\n"
+
+    # Create a theory for k
     k_theory = f"k() = {k}.\n"
 
     if(isBool != None and method == "Online2"):
@@ -105,6 +106,7 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
             #Check for already existing partial solution in the existing structure
             target = "structure"
             begin_struct = indexsearch(lines,target)
+            # If no structure present create it and modify procedure
             if begin_struct == -1:
                 # Create Structure
                 lines = createBlock(lines,block='struct')
@@ -127,8 +129,11 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
             begin_theory = indexsearch(lines,target)
             end_theory = indexEndofBlock(lines,begin_theory)
             index = indexsearch(lines[begin_struct:end_struct],f'{goal[i]} :=')
+            # If relevant domain is already present in the structure, copy it for the newly added solutions
             if index != -1:
+                print(f'goal[{i}]: {goal[i]}')
                 index += begin_struct
+                # If it's a constant, take the last value of the constant and copy it to n solutions
                 if var.cte[i]:
                     # index += begin_struct
                     value_cte = lines[index].split('->')[-1].split('}.')[0].strip()
@@ -136,8 +141,11 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
                     for j in range(1,n):
                         struct_cte_values += f"s{j} -> {value_cte}, "
                     struct_cte_values+=f"s{n} -> {value_cte} " + "}.\n"
+                    # print(struct_cte_values)
                     lines[index] = struct_cte_values
                     continue
+                # Find all the tuples in the structure and update them with the correct solution
+                # Make copies of the existing relevant domain structure for each of the new solution 
                 tuples_pattern = re.compile(r'\((.*?)\)')
                 tuples = tuples_pattern.findall(lines[index])
                 # print(tuples)
@@ -154,22 +162,24 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
                 continue
             # If a partial solution is already present, update it
             if(indexsearch(lines[begin_struct:end_struct],partSol[i].split('{')[0]) != -1):
+                print(f'partSol[{i}] function: {partSol[i].split("{{")[0]}')
                 index = indexsearch(lines[begin_struct:end_struct],partSol[i].split('{')[0]) + begin_struct
                 lines[index] = partSol[i]
             elif(indexsearch(lines[begin_theory:end_theory],partSol[i].split('&')[0]) != -1):
+                print(f'partSol[{i}] predicate: {partSol[i].split("&")[0]}')
                 index = indexsearch(lines[begin_theory:end_theory],partSol[i].split('&')[0]) + begin_theory
                 lines[index] = partSol[i]
-            # If it's a predicate it should be placed in the theory
+                print('partSol',lines[index])
+            # If no partial solution is yet present (distinguish between predicates and functions)
             elif(isBool[i]):
                 target="theory"
                 index = indexsearch(lines,target)+1
                 lines.insert(index,partSol[i])
-            # Otherwise in the structure
             else:
                 target="structure"
                 index = indexsearch(lines,target)+1 
                 lines.insert(index,partSol[i])
-        # Update k
+        # Update the value of k
         target = "k() ="
         index = indexsearch(lines,target)
         lines[index] = k_theory
@@ -177,87 +187,93 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
 
     k_voc = "k: () -> Real\n"
     dist_voc = "distance: solution * solution -> Int\n"
-    k_dist_theory = " sum{{distance(solution__x,solution__y) | solution__x,solution__y in solution: solution__x ~= solution__y }}/2 >= k()."
-    end = "\n"
+    k_dist_theory = "sum{{distance(solution__x,solution__y) | solution__x,solution__y in solution: solution__x ~= solution__y }}/2 >= k().\n"
 
-    # Update predicate/function 
+    # Update predicate/function and create new distance theory 
     dist_theory = "!solution__x,solution__y in solution: distance(solution__x,solution__y) = "   
     cardinal = []
     first = True
     idx=0
-    indx = 0
-    for func in goal:
-        target=f"{func}"
+    for i in range(len(goal)):
+        # Search for relevant function/variable in the vocabulary
+        target=f"{goal[i]}"
         index = indexsearch(lines,target)
+        # Save the index of the first relevant function/variable
         if first:
             idx = index
             first = False
-        cardinal.append(dist_expr(lines[index].split(':')[1],func))
-        # print(lines[index])
-        # print(lines[index].split(':')[1])
+        # Append the distance function theory with Hamming distances
+        cardinal.append(dist_expr(lines[index].split(':')[1],goal[i]))
+        # Update the existing vocabulary of relevant problem domain
         if '()' in lines[index]:
             lines[index] = lines[index].replace("()", "solution")
-            var.cte[indx] = 1
+            var.cte[i] = 1
             # print(lines[index])            
         else:
             lines[index] = lines[index].split(':')[0] + ": solution *" + lines[index].split(':')[1]
-        indx += 1
         # print(lines[index])
-    dist_theory += "+".join(cardinal) + '.'
+
+    # Assemble the entire distance definition
+    dist_theory += "+".join(cardinal) + '.\n'
     if method == 'Relevance' and dist_theory_ != None:
         dist_theory = dist_theory_
     # print(dist_theory)
 
+    # Insert the new vocabulary lines
     lines.insert(idx,type_sol)
+    if method == 'Offline':
+        lines.insert(index+2,'k_dist_set: solution-> Bool\n')
+        lines.insert(index+2,'n: () -> Int\n')
     lines.insert(index+2,k_voc)
-    lines.insert(index+2,dist_voc +end)
+    lines.insert(index+2,dist_voc)
 
+    # Update existing theory with solution type
     target="theory"
     index = indexsearch(lines,target)
     end_theory = indexEndofBlock(lines,index)
-
-    # Update existing theory with solution type
-    indx = 0
-    for func in goal:
+    for i in range(len(goal)):
         target="theory"
         index = indexsearch(lines,target)
-        # print(func)
-        func_theory_idx = [i for i in range(len(lines)) if func in lines[i] and i >= index  and i < end_theory]
+        # print(goal[i])
+        # Find all the theory lines with the relevant domain in it
+        func_theory_idx = [j for j in range(index, end_theory) if goal[i] in lines[j]]
         # print(func_theory_idx)
-        pattern = r'\b' + re.escape(func) + r'\s*\((.*?)\)'
-        for i in func_theory_idx:
-            # print(lines[i])
-            if f'{func}()' in lines[i]:
-                lines[i] = re.sub(pattern, re.escape(func) + r'(solution__0)', lines[i])
-                # print(lines[i])
+        pattern = r'\b' + re.escape(goal[i]) + r'\s*\((.*?)\)'
+        for j in func_theory_idx:
+            print(lines[j])
+            if f'{goal[i]}()' in lines[j]:
+                lines[j] = re.sub(pattern, re.escape(goal[i]) + r'(solution__0)', lines[j])
+                # print(lines[j])
             else: 
-                lines[i] = re.sub(pattern, re.escape(func) + r'(solution__0, \1)', lines[i])
-            if(func == goal[0]):
-                lines[i] = "!solution__0 in solution:" + lines[i]
-            index = i
-        indx += 1
+                lines[j] = re.sub(pattern, re.escape(goal[i]) + r'(solution__0, \1)', lines[j])
+            if "!solution__0 in solution:" not in lines[j]:
+                lines[j] = "!solution__0 in solution:" + lines[j]
+    index = j
+
+    # Insert the k and distance theory lines
+    if method == 'Offline':
+        lines.insert(index+1,'#{solution__0 in solution: k_dist_set(solution__0)} = n().\n')
+        lines.insert(index+1,f'n() = {n}.\n')
     lines.insert(index+1,k_theory)
-    lines.insert(index+1,k_dist_theory + end)
-    lines.insert(index+1,dist_theory + end)
+    lines.insert(index+1,k_dist_theory)
+    lines.insert(index+1,dist_theory)
 
     # Update the structure, if relevant functions present
-    indx = 0
     # print(cte)
-    for func in goal:
+    for i in range(len(goal)):
         target = "structure"
         begin_struct = indexsearch(lines,target)
         end_struct = indexsearch(lines[begin_struct:],"}") + begin_struct
-        index = indexsearch(lines[begin_struct:end_struct],func)
+        index = indexsearch(lines[begin_struct:end_struct],goal[i])
         if index == -1:
-            indx += 1
             continue
         else: index += begin_struct
         # print(indx)
-        if var.cte[indx]:
+        if var.cte[i]:
             value_cte = lines[index].split(':=')[1].strip().strip('.')
-            struct_cte_values = f"{func} := {{"
-            for i in range(1,n):
-                struct_cte_values += f"s{i} -> {value_cte}, "
+            struct_cte_values = f"{goal[i]} := {{"
+            for j in range(1,n):
+                struct_cte_values += f"s{j} -> {value_cte}, "
             struct_cte_values+=f"s{n} -> {value_cte} " + "}.\n"
             lines[index] = struct_cte_values
             continue
@@ -265,12 +281,11 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
         tuples = tuples_pattern.findall(lines[index])
         # print(tuples)
         formatted_tuples = []
-        for i in range(1,n+1):
-            formatted_tuples += [f"(s{i},{t})" for t in tuples]
+        for j in range(1,n+1):
+            formatted_tuples += [f"(s{j},{t})" for t in tuples]
         # print(formatted_tuples)
         func_struct = ",".join(formatted_tuples)
-        lines[index] = f"{func} := {{" + func_struct + "}."
-        indx += 1   
+        lines[index] = f"{goal[i]} := {{" + func_struct + "}."  
     # printCode(lines)
     # exit()
 
@@ -311,7 +326,6 @@ def checkPredFunc(lines:list,relevant:list) -> Iterator[int]:
 
 def collectSol(output:str,relevant:list,isBool:list): # Neem altijd de eerste oplossing
     partSol = []
-    print(output)
     for i in range(len(relevant)):
         # print(f'rel: {relevant[i]}')
         # print('===OUTPUT===')
@@ -336,7 +350,7 @@ def collectSol(output:str,relevant:list,isBool:list): # Neem altijd de eerste op
             # print(line)
             partsol = f'{relevant[i]} >> ' + line.split(":=")[1]
         partSol.append(partsol)
-    print(f'partSol:\n {partSol}')
+    # print(f'partSol:\n {partSol}')
     if partSol[i].strip() == '.':
         print("Error: cannot satisfy given parameters. Change 'n' or 'k' .")
         exit()
