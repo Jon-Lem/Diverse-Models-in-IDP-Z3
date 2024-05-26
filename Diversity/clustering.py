@@ -221,7 +221,7 @@ def clustering(simMat,k,n,method):
         l = []
         for j in range(len(clusters)):
             if clusterComp(clusters,i,j,l): 
-                if(simMat[i][j] >= k/n):
+                if(simMat[i][j] >= (k/((n-1)*n*0.5))):
                     # print(f'(s{i},s{j}) -> {simMat[i][j]}')
                     if i not in solutions: solutions.append(i)
                     if j not in solutions: solutions.append(j)
