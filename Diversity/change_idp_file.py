@@ -85,12 +85,34 @@ def indexEndofBlock(lines:list,index:int):
     end_theory = close
     return end_theory
 
-def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=None,dist_theory_=None):
+def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=None,dist_theory_=None,n_orig=None):
     # Create 'type solution'
     type_sol = "type solution := {"
     for i in range(1,n):
         type_sol += f"s{i},"
     type_sol+=f"s{n}" + "}\n"
+
+    # If no structure present create it and modify procedure
+    target = "structure"
+    begin_struct = indexsearch(lines,target)
+    if begin_struct == -1:
+        # Create Structure
+        lines = createBlock(lines,block='struct')
+        target="structure"
+        begin_struct = indexsearch(lines,target)
+        # Update main procedure
+        target="model_expand"
+        for l in range(len(lines)):
+            if target in lines[l]:
+                # print(lines[l])
+                comma_idx = indexsearch(lines[l],',')
+                if(comma_idx != -1):
+                    lines[l] = lines[l][:comma_idx] + ',S' + lines[l][comma_idx:]
+                else:
+                    comma_idx = indexsearch(lines[l],')')
+                    lines[l] = lines[l][:comma_idx] + ',S' + lines[l][comma_idx:]
+                # print(lines[l])
+    end_struct = indexsearch(lines[begin_struct:],"}") + begin_struct
 
     # Create a theory for k
     k_theory = f"k() = {k}.\n"
@@ -103,35 +125,13 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
         # Update partial solutions
         # print(partSol)
         for i in range(len(partSol)):
-            #Check for already existing partial solution in the existing structure
-            target = "structure"
-            begin_struct = indexsearch(lines,target)
-            # If no structure present create it and modify procedure
-            if begin_struct == -1:
-                # Create Structure
-                lines = createBlock(lines,block='struct')
-                target="structure"
-                begin_struct = indexsearch(lines,target)
-                # Update main procedure
-                target="model_expand"
-                for l in range(len(lines)):
-                    if target in lines[l]:
-                        # print(lines[l])
-                        comma_idx = indexsearch(lines[l],',')
-                        if(comma_idx != -1):
-                            lines[l] = lines[l][:comma_idx] + ',S' + lines[l][comma_idx:]
-                        else:
-                            comma_idx = indexsearch(lines[l],')')
-                            lines[l] = lines[l][:comma_idx] + ',S' + lines[l][comma_idx:]
-                        # print(lines[l])
-            end_struct = indexsearch(lines[begin_struct:],"}") + begin_struct
             target="theory"
             begin_theory = indexsearch(lines,target)
             end_theory = indexEndofBlock(lines,begin_theory)
             index = indexsearch(lines[begin_struct:end_struct],f'{goal[i]} :=')
             # If relevant domain is already present in the structure, copy it for the newly added solutions
             if index != -1:
-                print(f'goal[{i}]: {goal[i]}')
+                # print(f'goal[{i}]: {goal[i]}')
                 index += begin_struct
                 # If it's a constant, take the last value of the constant and copy it to n solutions
                 if var.cte[i]:
@@ -162,14 +162,14 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
                 continue
             # If a partial solution is already present, update it
             if(indexsearch(lines[begin_struct:end_struct],partSol[i].split('{')[0]) != -1):
-                print(f'partSol[{i}] function: {partSol[i].split("{{")[0]}')
+                # print(f'partSol[{i}] function: {partSol[i].split("{{")[0]}')
                 index = indexsearch(lines[begin_struct:end_struct],partSol[i].split('{')[0]) + begin_struct
                 lines[index] = partSol[i]
             elif(indexsearch(lines[begin_theory:end_theory],partSol[i].split('&')[0]) != -1):
-                print(f'partSol[{i}] predicate: {partSol[i].split("&")[0]}')
+                # print(f'partSol[{i}] predicate: {partSol[i].split("&")[0]}')
                 index = indexsearch(lines[begin_theory:end_theory],partSol[i].split('&')[0]) + begin_theory
                 lines[index] = partSol[i]
-                print('partSol',lines[index])
+                # print('partSol',lines[index])
             # If no partial solution is yet present (distinguish between predicates and functions)
             elif(isBool[i]):
                 target="theory"
@@ -248,15 +248,14 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
                 lines[j] = re.sub(pattern, re.escape(goal[i]) + r'(solution__0, \1)', lines[j])
             if "!solution__0 in solution:" not in lines[j]:
                 lines[j] = "!solution__0 in solution:" + lines[j]
-    index = j
 
     # Insert the k and distance theory lines
     if method == 'Offline':
-        lines.insert(index+1,'#{solution__0 in solution: k_dist_set(solution__0)} = n().\n')
-        lines.insert(index+1,f'n() = {n}.\n')
-    lines.insert(index+1,k_theory)
-    lines.insert(index+1,k_dist_theory)
-    lines.insert(index+1,dist_theory)
+        lines.insert(end_theory,'#{solution__0 in solution: k_dist_set(solution__0)} = n().\n')
+        lines.insert(end_theory,f'n() = {n_orig}.\n')
+    lines.insert(end_theory,k_theory)
+    lines.insert(end_theory,k_dist_theory)
+    lines.insert(end_theory,dist_theory)
 
     # Update the structure, if relevant functions present
     # print(cte)
@@ -382,7 +381,7 @@ def collectBaseSol(lines:list,output:str,relevant:list,isBool:list) -> tuple[int
                     tuples_pattern = re.compile(r'\((.*?)\)')
                     tuples = tuples_pattern.findall(line)
                     # print(line)
-                    print(tuples)
+                    # print(tuples)
                     formatted_tuples = [f"{relevant[i]}(s{n}, {t})" for t in tuples]
                     # print(formatted_tuples)
                     if formatted_tuples == []:
@@ -401,7 +400,7 @@ def collectBaseSol(lines:list,output:str,relevant:list,isBool:list) -> tuple[int
                     if formatted_tuples == []:
                         range_ = line.split(':=')[1].strip().strip('.')
                         part_sol = f's{n} -> {range_}'
-                        print(part_sol)
+                        # print(part_sol)
                         partsol += part_sol + " , "
                         continue
                     part_sol = ", ".join(formatted_tuples)

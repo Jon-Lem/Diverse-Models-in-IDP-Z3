@@ -64,12 +64,12 @@ class idp(IDP):
             #Clustering
             clustering(simMat,k,n,method)
         if method == "Offline":
+            n_orig = n
             output = runCode(lines)
             print(output)
             isBool = checkPredFunc(lines,relevant)
             n,partSol = collectBaseSol(lines,output,relevant,isBool)
-            insertCode(lines,n,k,relevant,partSol,isBool,method)
-            # print(partsol)
+            insertCode(lines,n,k,relevant,partSol,isBool,method,n_orig=n_orig)
             printCode(lines)
             output = runCode(lines)
             print(output)
