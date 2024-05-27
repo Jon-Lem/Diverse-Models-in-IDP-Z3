@@ -5,7 +5,7 @@ idp_files=("mapcoloring.idp" "nqueen.idp" "testcase2.idp")
 # Define nk_values for each IDP file
 declare -A nk_values=(
     ["mapcoloring.idp"]="3,117 4,234 6,475"
-    ["nqueen.idp"]="3,36 4,48 6,72"
+    ["nqueen.idp"]="3,36 4,72 6,180"
     ["testcase2.idp"]="3,29 4,58 6,141"
 )
 k_percent=("0.6" "0.8" "0.9" "1")

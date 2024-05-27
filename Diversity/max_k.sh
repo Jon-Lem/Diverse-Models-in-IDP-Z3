@@ -1,29 +1,23 @@
 #!/bin/bash
 
-# Initial value of k
-k=12
 
-# Maximum number of iterations (you can adjust this as needed)
+k=137
 max_iterations=100
-
-# Timeout duration in seconds (5 minutes = 300 seconds)
 timeout_duration=300
-
-# Function to handle the script interruption
 cleanup() {
   echo "Script interrupted. Exiting..."
   exit 1
 }
-
 # Trap the interrupt signal (SIGINT)
 trap cleanup SIGINT
-
 # Function to run the Python script with a timeout
 run_with_timeout() {
   local k_value=$1
   local output
-  # Capture the output of the Python script
-  output=$(timeout $timeout_duration python3 diversity.py ../Base/testcase2.idp -n "3" -k "$k_value" "Offline")
+  output=$(timeout $timeout_duration python3 diversity.py ../Base/testcase2.idp -n "6" -k "$k_value" "Online1")
+  # output=$(timeout $timeout_duration python3 diversity.py ../Base/mapcoloring.idp -n "6" -k "$k_value" "Online1")
+  # output=$(timeout $timeout_duration python3 diversity.py ../Base/nqueenv2.idp -n "6" -k "$k_value" "Clustering")
+  # output=$(timeout $timeout_duration python3 diversity.py ../Base/nqueenv2.idp -n "6" -k "$k_value" "Kmedoids")
   local exit_status=$?
 
   if [ $exit_status -eq 124 ]; then
@@ -32,7 +26,7 @@ run_with_timeout() {
   fi
 
   # Check if the output contains "No models."
-  if [[ "$output" == *"No models."* ]]; then
+  if [[ "$output" == *"No models."* || "$output" == *"Solution is not satisfiable"* ]]; then
     echo "No models found for k=$k_value. Stopping the script."
     exit 1
   fi
