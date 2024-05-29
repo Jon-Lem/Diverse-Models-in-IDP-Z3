@@ -38,7 +38,7 @@ for idp_file in "${idp_files[@]}"; do
                 echo "Executing: python3 ../Diversity/diversity.py ../Base_Online/$idp_file -n \"$n\" -k \"$actual_k\" \"$method\""
 
                 # Execute the Python script and capture the output
-                output=$(timeout 300 python3 diversity.py ../Base/$idp_file -n "$n" -k "$actual_k" "$method")
+                output=$(timeout 300 python3 ../Diversity/diversity.py ../Base_Online/$idp_file -n "$n" -k "$actual_k" "$method")
                 if [[ $? -eq 124 ]]; then
                     # If timeout occurred, log 'Timeout'
                     time="Timeout"
