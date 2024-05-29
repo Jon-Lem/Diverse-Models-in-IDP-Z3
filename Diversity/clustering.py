@@ -1,11 +1,8 @@
 import numpy as np
 import itertools
-from collections import defaultdict
 from sklearn_extra.cluster import KMedoids
 import re
-from scipy.cluster.hierarchy import dendrogram, linkage
-from scipy.spatial.distance import squareform
-from sklearn.metrics import silhouette_score
+from scipy.cluster.hierarchy import dendrogram
 from sklearn.cluster import AgglomerativeClustering
 from matplotlib import pyplot as plt
 
