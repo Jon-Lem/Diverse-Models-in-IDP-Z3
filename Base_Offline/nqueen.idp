@@ -1,0 +1,13 @@
+vocabulary V {
+    type Index := {1..12}
+    queen : Index -> Index
+}
+
+theory T:V {
+    !x,y in Index: x ~= y => queen(x) ~= queen(y).
+    !x,y in Index: x ~= y => (queen(y) ~= -y + x + queen(x)) & (queen(y) ~=  y - x + queen(x)).
+}
+
+procedure main() {
+    pretty_print(model_expand(T,max=10000, timeout_seconds=0))
+}

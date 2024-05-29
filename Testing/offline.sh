@@ -1,76 +1,58 @@
 #!/bin/bash
 
-# Check for the correct number of arguments
-if [ "$#" -ne 4 ]; then
-  echo "Usage: $0 <n> <k> <idp_filename> <mode>"
-  echo "mode should be either 'Single' or 'Complete'"
-  exit 1
-fi
 
-n=$1
-k=$2
-idp_filename=$3
-mode=$4
-idp_file="../Base/$idp_filename"
-max_iterations=100
-timeout_duration=300
+idp_files=("mapcoloring.idp" "nqueen.idp" "testcase2.idp")
 
-# Validate the mode
-if [ "$mode" != "Single" ] && [ "$mode" != "Complete" ] && [ "$mode" != "Offline" ]; then
-  echo "Invalid mode. Please pass 'Single' or 'Complete'."
-  exit 1
-fi
+declare -A nk_values=(
+    ["mapcoloring.idp"]="3,117 4,234 6,475"
+    ["nqueenv2.idp"]="3,36 4,72 6,180"
+    ["testcase2.idp"]="3,29 4,58 6,141"
+)
 
-# Validate the IDP file
-if [ ! -f "$idp_file" ]; then
-  echo "The file $idp_file does not exist."
-  exit 1
-fi
+k_percent=("0.6" "0.8" "0.9" "1")
 
-cleanup() {
-  echo "Script interrupted. Exiting..."
-  echo "Last successful k value: $last_successful_k"
-  exit 1
-}
+start_time=$(date +%s)
 
-# Trap the interrupt signal (SIGINT)
-trap cleanup SIGINT
+methods=("Offline" "Single" "Complete" "Kmedoids")
 
-# Function to run the Python script with a timeout
-run_with_timeout() {
-  local k_value=$1
-  local output
-  output=$(timeout $timeout_duration python3 diversity.py "$idp_file" -n "$n" -k "$k_value" "$mode")
-  local exit_status=$?
+results_file="../Results/offline_results.txt"
+echo "Execution Results:" > $results_file
 
-  if [ $exit_status -eq 124 ]; then
-    echo "Execution of k=$k_value took longer than $timeout_duration seconds. Stopping the script."
-    echo "Last successful k value: $last_successful_k"
-    exit 1
-  fi
+for idp_file in "${idp_files[@]}"; do
+    nk_values_idp=(${nk_values[$idp_file]})
 
-  # Check if the output contains "No models."
-  if [[ "$output" == *"No models."* || "$output" == *"Solution is not satisfiable"* ]]; then
-    echo "No models found for k=$k_value. Stopping the script."
-    echo "Last successful k value: $last_successful_k"
-    exit 1
-  fi
-}
+    # Loop through each method
+    for method in "${methods[@]}"; do
+        echo "Method: $method" >> $results_file
+        echo '' >> $results_file
 
-# Initialize the last successful k value
-last_successful_k=$k
+        # Loop through each n, k combination
+        for nk in "${nk_values_idp[@]}"; do
+            IFS=',' read -r n k <<< "$nk"
 
-# Loop to run the script with incrementing k values
-for ((i=0; i<$max_iterations; i++)); do
-  echo "Running with k=$k"
-  run_with_timeout $k
+            # Loop through each k percentage multiplier
+            for perc in "${k_percent[@]}"; do
+                actual_k=$(echo "$k * $perc" | bc)
 
-  # Update the last successful k value
-  last_successful_k=$k
+                # Log the command being executed
+                echo "Executing: python3 ../Diversity/diversity.py ../Base_Offline/$idp_file -n \"$n\" -k \"$actual_k\" \"$method\""
 
-  # Increment k for the next iteration
-  k=$((k + 1))
+                # Execute the Python script and capture the output
+                output=$(timeout 300 python3 ../Diversity/diversity.py ../Base_Offline/$idp_file -n "$n" -k "$actual_k" "$method")
+                if [[ $? -eq 124 ]]; then
+                    # If timeout occurred, log 'Timeout'
+                    time="Timeout"
+                else
+                    # Extract execution time from the output
+                    time=$(echo "$output" | grep -o '[0-9]\+\.[0-9]\+ seconds')
+                fi
+
+                # Append results to the results file
+                echo -n " & ${time:-X}" >> $results_file
+
+                echo "=============================="
+            done
+        done
+        echo "\hline" >> $results_file
+    done
 done
-
-echo "Completed all iterations."
-echo "Last successful k value: $last_successful_k"
