@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 idp_files=("mapcoloring.idp" "nqueen.idp" "testcase2.idp")
 
 declare -A nk_values=(
@@ -38,14 +37,10 @@ for idp_file in "${idp_files[@]}"; do
                 echo "Executing: python3 ../Diversity/diversity.py ../Base_Offline/$idp_file -n \"$n\" -k \"$actual_k\" \"$method\""
 
                 # Execute the Python script and capture the output
-                output=$(timeout 300 python3 ../Diversity/diversity.py ../Base_Offline/$idp_file -n "$n" -k "$actual_k" "$method")
-                if [[ $? -eq 124 ]]; then
-                    # If timeout occurred, log 'Timeout'
-                    time="Timeout"
-                else
-                    # Extract execution time from the output
-                    time=$(echo "$output" | grep -o '[0-9]\+\.[0-9]\+ seconds')
-                fi
+                output=$(python3 ../Diversity/diversity.py ../Base_Offline/$idp_file -n "$n" -k "$actual_k" "$method")
+
+                # Extract execution time from the output
+                time=$(echo "$output" | grep -o '[0-9]\+\.[0-9]\+ seconds')
 
                 # Append results to the results file
                 echo -n " & ${time:-X}" >> $results_file
