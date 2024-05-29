@@ -1,0 +1,145 @@
+Results of nqueen experiments:
+Time: 36.04894995689392 seconds seconds
+n: 3
+k: 21.6
+Method: Online1
+Time: 36.05991005897522 seconds seconds
+n: 3
+k: 28.8
+Method: Online1
+Time: 41.6529803276062 seconds seconds
+n: 3
+k: 32.4
+Method: Online1
+Time: 37.293790102005005 seconds seconds
+n: 3
+k: 36
+Method: Online1
+Time: 68.76938939094543 seconds seconds
+n: 3
+k: 21.6
+Method: Online2
+Time: 68.75287342071533 seconds seconds
+n: 3
+k: 28.8
+Method: Online2
+Time: 74.83524751663208 seconds seconds
+n: 3
+k: 32.4
+Method: Online2
+Time: 70.08613133430481 seconds seconds
+n: 3
+k: 36
+Method: Online2
+Time: 12.077745199203491 seconds seconds
+n: 3
+k: 21.6
+Method: Clustering
+Time: Not Available seconds
+n: 3
+k: 28.8
+Method: Clustering
+Time: Not Available seconds
+n: 3
+k: 32.4
+Method: Clustering
+Time: Not Available seconds
+n: 3
+k: 36
+Method: Clustering
+Time: 54.26597857475281 seconds seconds
+n: 4
+k: 28.8
+Method: Online1
+Time: 55.50977110862732 seconds seconds
+n: 4
+k: 38.4
+Method: Online1
+Time: 54.45657968521118 seconds seconds
+n: 4
+k: 43.2
+Method: Online1
+Time: 54.885106801986694 seconds seconds
+n: 4
+k: 48
+Method: Online1
+Time: 125.58039450645447 seconds seconds
+n: 4
+k: 28.8
+Method: Online2
+Time: 124.49346685409546 seconds seconds
+n: 4
+k: 38.4
+Method: Online2
+Time: 126.37630605697632 seconds seconds
+n: 4
+k: 43.2
+Method: Online2
+Time: 123.584876537323 seconds seconds
+n: 4
+k: 48
+Method: Online2
+Time: 12.472113609313965 seconds seconds
+n: 4
+k: 28.8
+Method: Clustering
+Time: Not Available seconds
+n: 4
+k: 38.4
+Method: Clustering
+Time: Not Available seconds
+n: 4
+k: 43.2
+Method: Clustering
+Time: Not Available seconds
+n: 4
+k: 48
+Method: Clustering
+Time: 121.19539904594421 seconds seconds
+n: 6
+k: 43.2
+Method: Online1
+Time: 121.98071670532227 seconds seconds
+n: 6
+k: 57.6
+Method: Online1
+Time: 118.72334432601929 seconds seconds
+n: 6
+k: 64.8
+Method: Online1
+Time: 119.85095429420471 seconds seconds
+n: 6
+k: 72
+Method: Online1
+Time: 335.43878722190857 seconds seconds
+n: 6
+k: 43.2
+Method: Online2
+Time: 328.8071200847626 seconds seconds
+n: 6
+k: 57.6
+Method: Online2
+Time: 329.78812193870544 seconds seconds
+n: 6
+k: 64.8
+Method: Online2
+Time: 324.3504660129547 seconds seconds
+n: 6
+k: 72
+Method: Online2
+Time: 12.157481670379639 seconds seconds
+n: 6
+k: 43.2
+Method: Clustering
+Time: Not Available seconds
+n: 6
+k: 57.6
+Method: Clustering
+Time: Not Available seconds
+n: 6
+k: 64.8
+Method: Clustering
+Time: Not Available seconds
+n: 6
+k: 72
+Method: Clustering

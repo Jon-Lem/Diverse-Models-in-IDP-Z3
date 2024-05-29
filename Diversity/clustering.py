@@ -6,8 +6,6 @@ from scipy.cluster.hierarchy import dendrogram
 from sklearn.cluster import AgglomerativeClustering
 from matplotlib import pyplot as plt
 
-distcheck = 0
-
 def saveModel(output,pattern):
     models = []
     for line in output.split("\n"):
@@ -85,7 +83,7 @@ def searchNKmodels(simMat,n,k):
                 solutions_candidates = list(combo)
                 solutions_candidates.append(sol[0])
                 # print(solutions_candidates)
-                if distCheck(simMat,solutions_candidates,k):
+                if distCheck(simMat,solutions_candidates,distance_treshold):
                     return sorted(solutions_candidates)
         else: continue
     print('Solution is not satisfiable')
@@ -126,7 +124,7 @@ def translate(result,valdict):
 
     return dewey
 
-def distCheck(simMat,solutions,k):
+def distCheck(simMat,solutions,distance_treshold):
     # print(solutions)
     sum_distance = 0
     for i in range(len(solutions)):
@@ -135,16 +133,9 @@ def distCheck(simMat,solutions,k):
             b = solutions[j]
             sum_distance += simMat[a][b]
             # print(f'(s{a+1},s{b+1}) -> {simMat[a][b]}')
-    if(sum_distance//2 >= k):
-        # print("distCheck 1")
-        # print(solutions)
-        # print(sum_distance/2)
-        global distcheck
-        distcheck=1
-        return True
-    else: 
-        # print("distCheck 0")
-        return False
+            if a != b and simMat[a][b] < distance_treshold:
+                return False
+    return True
     
 def prettyPrint(simMat,solutions,k):
     total_distance = 0
@@ -163,19 +154,15 @@ def prettyPrint(simMat,solutions,k):
         exit()
     print(f'k := {k}.')
 
-def clusterComp(clusters:list,i:int,j:int,l:list):
-    if clusters[i] != clusters[j] and l == []:
-        return True
-    elif clusters[i] != clusters[j] and l != [] :
-        for item in l:
-            if(clusters[j] == clusters[item]):
-                return False
-        return True
-    else:
-        return False
+def clusterComp(clusters:list,solutions:list,j:int):
+    for solution in solutions:
+        if(clusters[j] == clusters[solution]):
+            return False
+    return True
 
 def clustering(simMat,k,n,method,linkage_type):
     print(f'distance_threshold = {k//((n-1)*n*0.5)}')
+    solutions = []  
     if method == 'Clustering' or method == "Single" or method == "Complete":
         # linkage_type ='complete'
         model = AgglomerativeClustering(
@@ -185,7 +172,7 @@ def clustering(simMat,k,n,method,linkage_type):
         linkage=linkage_type
         ).fit(simMat)
         print(f" Number of clusters: {model.n_clusters_}")
-        if(model.n_clusters_ == 1):
+        if(model.n_clusters_ < n):
             print('Solution is not satisfiable')
             exit()
         clusters = list(model.labels_)
@@ -212,30 +199,15 @@ def clustering(simMat,k,n,method,linkage_type):
     # plt.xlabel("Number of points in node (or index of point if no parenthesis).")
     # plt.show()
 
-    solutions = []
+    # Compare the models
     for i in range(len(clusters)):
-        l = []
         for j in range(len(clusters)):
-            if clusterComp(clusters,i,j,l): 
-                if(simMat[i][j] >= (k/((n-1)*n*0.5))):
-                    # print(f'(s{i},s{j}) -> {simMat[i][j]}')
-                    if i not in solutions: solutions.append(i)
-                    if j not in solutions: solutions.append(j)
-                    l.append(j)
+            if clusterComp(clusters,solutions,j) and simMat[i][j] >= (k/((n-1)*n*0.5)): 
+                if i not in solutions: solutions.append(i)
+                if j not in solutions: solutions.append(j)
         # print(l)
-    # print(solutions)
-    # exit()
-    n_solutions=solutions[:n]
-    i = 0
-    while not distCheck(simMat,n_solutions,k) and len(solutions) > n+i:
-        i+=1
-        n_solutions = solutions[i:n+i]
-    # print(solutions)
-    # print(n_solutions)
-    solutions = n_solutions
-    if(distcheck==0):
-        print('Solution is not satisfiable')
-        exit()
+    print(solutions)
+    solutions=solutions[:n]
     prettyPrint(simMat,solutions,k)
 
     return

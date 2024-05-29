@@ -2,3 +2,4 @@ idp-engine
 scipy
 scikit-learn
 scikit-learn-extra
+matplotlib
