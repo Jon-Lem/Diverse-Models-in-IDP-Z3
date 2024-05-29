@@ -1,5 +1,6 @@
 import numpy as np
 import itertools
+from collections import defaultdict
 from sklearn_extra.cluster import KMedoids
 import re
 from scipy.cluster.hierarchy import dendrogram, linkage
@@ -29,7 +30,6 @@ def saveModel(output,pattern):
             models.append(model)
     return models
 
-
 def simMatrix(output,goal):
     for k in range(len(goal)):
         pattern = re.escape(goal[k]) + r' := {(.*)}'
@@ -57,33 +57,42 @@ def simMatrix(output,goal):
     return simMat
 
 def searchNKmodels(simMat,n,k):
-
+    solutions_candidates = []
     n_models = len(simMat)
-    # Generate all combinations of four points
-    combinations = itertools.combinations(range(n_models), n)
-    # print(combinations)
-    # Iterate through each combination
-    best_dist =0
-    for combo in combinations:
-        # print(combo)
-        total_distance = 0        
-        # Calculate the total distance among the four points
-        for i in range(n):
-            for j in range(n):
-                # print(f'Combination: {combo[i]} {combo[j]} : Distance: {simMat[combo[i]][combo[j]]}')
-                total_distance += simMat[combo[i]][combo[j]]
-        # print(combo)
-        # print('Total Distance:',total_distance/2)
-        if total_distance/2 > best_dist:
-            best_dist = total_distance/2
-            print('Current Best Total Distance:',best_dist)
-        # If the total distance matches the target distance, return the combination
-        if total_distance/2 >= k:
-            print('Best Total Distance:',total_distance/2)
-            return combo
-    
-    # If no such combination is found, return None
-    return None
+    print('Number of models: ',n_models)
+    distance_treshold = (k/((n-1)*n*0.5))
+    print('Distance treshold:',distance_treshold)
+    solutions = []
+    solution_space = []
+    for i in range(n_models):
+        number_of_connections = 0
+        for j in range(n_models):
+            if(simMat[i][j] >= distance_treshold):
+                number_of_connections += 1
+                if i not in solutions: solutions.append(i)
+                if j not in solutions: solutions.append(j)
+        solution_space.append(solutions)
+        solutions = [] 
+    # for i in range(n_models):
+    #     print(solution_space[i])
+    # exit()
+
+    for sol in solution_space:
+        if len(sol) >= n:
+            combinations = list(itertools.combinations(sol[1:], n-1))
+            # print('\nModel ',sol[0])
+            # print('==========\n')
+            for combo in combinations:
+                # print('Combo',list(combo))
+                # print(sol[0])
+                solutions_candidates = list(combo)
+                solutions_candidates.append(sol[0])
+                # print(solutions_candidates)
+                if distCheck(simMat,solutions_candidates,k):
+                    return sorted(solutions_candidates)
+        else: continue
+    print('Solution is not satisfiable')
+    exit()
 
 
 def plot_dendrogram(model, **kwargs):
@@ -141,14 +150,20 @@ def distCheck(simMat,solutions,k):
         return False
     
 def prettyPrint(simMat,solutions,k):
+    total_distance = 0
     dist = []
     for i in range(len(solutions)):
         for j in range(len(solutions)):
             a = solutions[i]
             b = solutions[j]
             dist.append(f'(s{a+1},s{b+1}) -> {simMat[a][b]}')
+            total_distance += simMat[a][b]
     distance = ','.join(dist)
     print('distance := {' + distance + '}.')
+    print('total distance :=',total_distance/2)
+    if total_distance/2 < k:
+        print('Solution is not satisfiable')
+        exit()
     print(f'k := {k}.')
 
 def clusterComp(clusters:list,i:int,j:int,l:list):
@@ -162,26 +177,10 @@ def clusterComp(clusters:list,i:int,j:int,l:list):
     else:
         return False
 
-def clustering(simMat,k,n,method):
-    # print(f'distance_threshold = {k//n}')
-    if method == 'Clustering':
-        linkage_type ='complete'
-        # best_sil = -1
-        # best_model = None
-        # for n_clusters in range(2,len(simMat)):
-        #     clusterer = AgglomerativeClustering(metric='precomputed',n_clusters=n_clusters, linkage=linkage_type)
-        #     model = clusterer.fit(simMat)
-        #     cluster_labels = model.labels_
-        #     silhouette_avg = silhouette_score(simMat, cluster_labels , metric="precomputed", )
-        #     # if (silhouette_avg < 0.17):
-        #     #     break
-        #     # print("For n_clusters =" ,n_clusters, "The average silhouette_score is :", silhouette_avg,)
-        #     if silhouette_avg > best_sil and n_clusters != 2:
-        #         best_sil = silhouette_avg
-        #         best_model = model
-        #         num_cluster = n_clusters
-        # model = best_model
-        print(k//((n-1)*n*0.5))
+def clustering(simMat,k,n,method,linkage_type):
+    print(f'distance_threshold = {k//((n-1)*n*0.5)}')
+    if method == 'Clustering' or method == "Single" or method == "Complete":
+        # linkage_type ='complete'
         model = AgglomerativeClustering(
         metric='precomputed',
         n_clusters=None,
@@ -226,8 +225,10 @@ def clustering(simMat,k,n,method):
                     if i not in solutions: solutions.append(i)
                     if j not in solutions: solutions.append(j)
                     l.append(j)
+        # print(l)
     # print(solutions)
-    n_solutions=solutions[0:n]
+    # exit()
+    n_solutions=solutions[:n]
     i = 0
     while not distCheck(simMat,n_solutions,k) and len(solutions) > n+i:
         i+=1

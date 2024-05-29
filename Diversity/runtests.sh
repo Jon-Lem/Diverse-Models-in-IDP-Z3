@@ -13,7 +13,7 @@ k_percent=("0.6" "0.8" "0.9" "1")
 start_time=$(date +%s)
 
 # Define the list of methods
-methods=("Offline" "Online1" "Online2" "Clustering" "Kmedoids")
+methods=("Offline" "Online1" "Online2" "Single" "Complete" "Kmedoids")
 
 for idp_file in "${idp_files[@]}"; do
     num_model="${num_models[$i]}"

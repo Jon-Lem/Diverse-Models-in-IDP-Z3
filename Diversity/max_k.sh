@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-k=137
+k=20
 max_iterations=100
 timeout_duration=300
 cleanup() {
@@ -14,8 +14,11 @@ trap cleanup SIGINT
 run_with_timeout() {
   local k_value=$1
   local output
-  output=$(timeout $timeout_duration python3 diversity.py ../Base/testcase2.idp -n "6" -k "$k_value" "Online1")
+  # output=$(timeout $timeout_duration python3 diversity.py ../Base/testcase2.idp -n "6" -k "$k_value" "Online1")
   # output=$(timeout $timeout_duration python3 diversity.py ../Base/mapcoloring.idp -n "6" -k "$k_value" "Online1")
+  # output=$(timeout $timeout_duration python3 diversity.py ../Base/mapcoloring.idp -n "6" -k "$k_value" "Online1")
+  output=$(timeout $timeout_duration python3 diversity.py ../Base/mapcoloring.idp -n "3" -k "$k_value" "Single")
+  # output=$(timeout $timeout_duration python3 diversity.py ../Base/mapcoloring.idp -n "6" -k "$k_value" "Complete")
   # output=$(timeout $timeout_duration python3 diversity.py ../Base/nqueenv2.idp -n "6" -k "$k_value" "Clustering")
   # output=$(timeout $timeout_duration python3 diversity.py ../Base/nqueenv2.idp -n "6" -k "$k_value" "Kmedoids")
   local exit_status=$?

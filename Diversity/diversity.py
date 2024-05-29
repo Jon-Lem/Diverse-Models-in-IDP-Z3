@@ -11,7 +11,7 @@ relevant = ''
 
 class idp(IDP):    
     def check_method(method:str) -> bool:
-        valid_methods = ["Base", "Offline", "Online1", "Online2", "Clustering", "Kmedoids", "Relevance", "Ordering" ]
+        valid_methods = ["Base", "Offline", "Online1", "Online2", "Clustering", "Kmedoids", "Relevance", "Ordering" ,"Single","Complete"]
         if method in valid_methods:
             return True
         else:
@@ -54,7 +54,7 @@ class idp(IDP):
             relevant = priorityOrdering(relevant)
             # print(relevant)
             dictlist, deweylist = orderModels(output,relevant)
-        if method == "Clustering" or method == "Kmedoids":
+        if method == "Clustering" or method == "Kmedoids" or method == "Single" or method == "Complete":
             output = runCode(lines)
             print(output)
             simMat = simMatrix(output,relevant)
@@ -62,17 +62,30 @@ class idp(IDP):
             for i in simMat:
                 print(i)
             #Clustering
-            clustering(simMat,k,n,method)
+            if method == "Single":
+                clustering(simMat,k,n,method,linkage_type='single')
+            elif method == "Complete":
+                clustering(simMat,k,n,method,linkage_type='complete')
+            else:
+                clustering(simMat,k,n,method,linkage_type='complete')
         if method == "Offline":
             n_orig = n
             output = runCode(lines)
             print(output)
-            isBool = checkPredFunc(lines,relevant)
-            n,partSol = collectBaseSol(lines,output,relevant,isBool)
-            insertCode(lines,n,k,relevant,partSol,isBool,method,n_orig=n_orig)
-            printCode(lines)
-            output = runCode(lines)
-            print(output)
+            simMat = simMatrix(output,relevant)
+            for i in simMat:
+                print(i)
+            # print(simMat[0])
+            solutions = searchNKmodels(simMat,n,k)
+            prettyPrint(simMat,solutions,k)
+
+            # isBool = checkPredFunc(lines,relevant)
+            # n,partSol = collectBaseSol(lines,output,relevant,isBool)
+            # insertCode(lines,n,k,relevant,partSol,isBool,method,n_orig=n_orig)
+            # printCode(lines)
+            # output = runCode(lines)
+            # print(output)
+
         if method == "Online1":
             insertCode(lines,n,k,relevant)
             printCode(lines)
