@@ -23,10 +23,10 @@ run_with_timeout() {
   local k_value=$4
 
   # Log the command being executed
-  echo "Executing: python3 ../Diversity/diversity.py ../Base_Intra_Offline/$idp_file -n \"$n\" -k \"$k_value\" \"$method\""
+  echo "Executing: python3 ../Diversity/diversity.py  ../Base_Intra_Offline/$idp_file -n \"$n\" -k \"$k_value\" \"$method\""
 
   # Execute the Python script and capture the output
-  output=$(timeout $timeout_duration python3 ../Diversity/diversity.py ../Base_Intra_Offline/$idp_file -n "$n" -k "$k_value" "$method")
+  output=$(timeout $timeout_duration python3 ../Diversity/diversity.py  ../Base_Intra_Offline/$idp_file -n "$n" -k "$k_value" "$method")
   local exit_status=$?
 
   if [ $exit_status -eq 124 ]; then
