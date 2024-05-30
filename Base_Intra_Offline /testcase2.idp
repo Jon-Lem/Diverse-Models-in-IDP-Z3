@@ -47,5 +47,5 @@ Eligible().
 
 }
 procedure main() {
-  pretty_print(model_expand(T,max=5000, timeout_seconds=0))
+  pretty_print(model_expand(T,max=500, timeout_seconds=0))
 }
