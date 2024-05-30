@@ -2,7 +2,7 @@
 
 
 k=20
-max_iterations=100
+max_iterations=1000
 timeout_duration=300
 cleanup() {
   echo "Script interrupted. Exiting..."

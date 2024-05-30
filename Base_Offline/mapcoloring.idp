@@ -22,7 +22,7 @@ structure {
 
 procedure main() {
     //print(model_check(T, S))  
-    pretty_print(model_expand(T, S, max=5000, timeout_seconds=0))
+    pretty_print(model_expand(T, S, max=1000, timeout_seconds=0))
 
 
 }

@@ -69,7 +69,6 @@ class idp(IDP):
             else:
                 clustering(simMat,k,n,method,linkage_type='complete')
         if method == "Offline":
-            n_orig = n
             output = runCode(lines)
             print(output)
             simMat = simMatrix(output,relevant)
@@ -78,7 +77,7 @@ class idp(IDP):
             # print(simMat[0])
             solutions = searchNKmodels(simMat,n,k)
             prettyPrint(simMat,solutions,k)
-
+            # n_orig = n
             # isBool = checkPredFunc(lines,relevant)
             # n,partSol = collectBaseSol(lines,output,relevant,isBool)
             # insertCode(lines,n,k,relevant,partSol,isBool,method,n_orig=n_orig)
