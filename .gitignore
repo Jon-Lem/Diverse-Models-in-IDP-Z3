@@ -3,6 +3,10 @@
 /Offline/test.py
 /Base/testcase.idp
 /Base/testcase2.idp
+/Base_Intra_Offline/testcase2.idp
+/Base_Max_Model/testcase2.idp
+/Base_Online/testcase2.idp
+/Base_Offline/testcase2.idp
 /Base/testcase2_o2.idp
 /Base/nqueen_o2.idp
 /Diversity/priority.txt
