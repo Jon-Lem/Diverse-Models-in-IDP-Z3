@@ -1,22 +1,20 @@
 #!/bin/bash
 
-
-# idp_files=("mapcoloring.idp" "nqueen.idp" "testcase2.idp")
-idp_files=("nqueen.idp")
+idp_files=("mapcoloring.idp" "nqueen.idp" "testcase2.idp")
 
 declare -A nk_values=(
-    # ["mapcoloring.idp"]="3,117 4,234 6,475"
+    ["mapcoloring.idp"]="3,117 4,234 6,475"
     ["nqueen.idp"]="3,36 4,72 6,180"
-    # ["testcase2.idp"]="3,29 4,58 6,141"
+    ["testcase2.idp"]="3,29 4,58 6,141"
 )
 
 k_percent=("0.6" "0.8" "0.9" "1")
 
 start_time=$(date +%s)
 
-methods=("Online1" "Online2")
+methods=("Single" "Complete" "Kmedoids")
 
-results_file="../Results/online_results.txt"
+results_file="../Results/clustering_results.txt"
 echo "Execution Results:" > $results_file
 
 for idp_file in "${idp_files[@]}"; do
@@ -36,17 +34,13 @@ for idp_file in "${idp_files[@]}"; do
                 actual_k=$(echo "$k * $perc" | bc)
 
                 # Log the command being executed
-                echo "Executing: python3 ../Diversity/diversity.py ../Base_Online/$idp_file -n \"$n\" -k \"$actual_k\" \"$method\""
+                echo "Executing: python3 ../Diversity/diversity.py ../Base_Offline/$idp_file -n \"$n\" -k \"$actual_k\" \"$method\""
 
                 # Execute the Python script and capture the output
-                output=$(timeout 300 python3 ../Diversity/diversity.py ../Base_Online/$idp_file -n "$n" -k "$actual_k" "$method")
-                if [[ $? -eq 124 ]]; then
-                    # If timeout occurred, log 'Timeout'
-                    time="Timeout"
-                else
-                    # Extract execution time from the output
-                    time=$(echo "$output" | grep -o '[0-9]\+\.[0-9]\+ seconds')
-                fi
+                output=$(python3 ../Diversity/diversity.py ../Base_Offline/$idp_file -n "$n" -k "$actual_k" "$method")
+
+                # Extract execution time from the output
+                time=$(echo "$output" | grep -o '[0-9]\+\.[0-9]\+ seconds')
 
                 # Append results to the results file
                 echo -n " & ${time:-X}" >> $results_file
