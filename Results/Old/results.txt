@@ -1,4 +1,0 @@
-Execution Results:
-Method: Offline
-
- & X & X
