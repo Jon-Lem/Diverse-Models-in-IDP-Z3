@@ -240,7 +240,7 @@ def insertCode(lines:list,n:int,k:int,goal:list,partSol=None,isBool=None,method=
         # print(func_theory_idx)
         pattern = r'\b' + re.escape(goal[i]) + r'\s*\((.*?)\)'
         for j in func_theory_idx:
-            print(lines[j])
+            # print(lines[j])
             if f'{goal[i]}()' in lines[j]:
                 lines[j] = re.sub(pattern, re.escape(goal[i]) + r'(solution__0)', lines[j])
                 # print(lines[j])
