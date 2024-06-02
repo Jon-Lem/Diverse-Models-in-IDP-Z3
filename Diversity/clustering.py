@@ -59,29 +59,26 @@ def searchNKmodels(simMat,n,k):
     print('Distance treshold:',distance_treshold)
     solutions = []
     solution_space = []
+    # Save the neighbouring models that have at least the distance of the treshold
     for i in range(n_models):
-        number_of_connections = 0
         for j in range(n_models):
             if(simMat[i][j] >= distance_treshold):
-                number_of_connections += 1
-                if i not in solutions: solutions.append(i)
                 if j not in solutions: solutions.append(j)
         solution_space.append(solutions)
         solutions = [] 
     # for i in range(n_models):
     #     print(solution_space[i])
-    # exit()
 
-    for sol in solution_space:
-        if len(sol) >= n:
-            combinations = list(itertools.combinations(sol[1:], n-1))
-            # print('\nModel ',sol[0])
+    for i in range(len(solution_space)):
+        if len(solution_space[i]) >= n-1:
+            combinations = list(itertools.combinations(solution_space[i], n-1))
+            # print('\nModel ',i)
             # print('==========\n')
             for combo in combinations:
                 # print('Combo',list(combo))
-                # print(sol[0])
+                # print(i)
                 solutions_candidates = list(combo)
-                solutions_candidates.append(sol[0])
+                solutions_candidates.append(i)
                 # print(solutions_candidates)
                 if distCheck(simMat,solutions_candidates,distance_treshold):
                     return sorted(solutions_candidates)
@@ -162,6 +159,7 @@ def clusterComp(clusters:list,solutions:list,j:int):
 
 def clustering(simMat,k,n,method,linkage_type):
     print(f'distance_threshold = {k//((n-1)*n*0.5)}')
+    print(len(simMat))
     solutions = []  
     if method == 'Clustering' or method == "Single" or method == "Complete":
         # linkage_type ='complete'
