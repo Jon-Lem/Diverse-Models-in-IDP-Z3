@@ -5,9 +5,7 @@ vocabulary {
   Bordering : (country * country) -> Bool
   ColourOf : (solution * country) -> color
   distance: solution * solution -> Int
-  k: () -> Int
-
-  
+  k: () -> Int  
 }
 
 structure {
