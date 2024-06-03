@@ -1,0 +1,12 @@
+AssetType
+SecurityType
+
+BondRiskProfile
+StructuredBondSubtypes
+Currency
+SecurityRating
+
+IssuerRating	
+IssuerCountry
+CountryOfRisk
+	

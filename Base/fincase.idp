@@ -1,0 +1,40 @@
+vocabulary V {
+	type Security_Type := {bond, equity, fund}
+	type Country := {Belgium, France, Luxembourg}
+	type Rating :={AAA, AA, A, BBB, BB, B}
+	type Industry :={automotive, banking, chemical}
+	type Currency := {EUR, USD, GBP, JPY}
+	
+	asset_security_type: () -> Security_Type
+	asset_country: () -> Country
+	asset_rating: () -> Rating
+	asset_industry: () -> Industry
+	asset_currency: () -> Currency
+	
+	inStrategy1: () -> Bool
+	nonStrategy1: () -> Bool
+	
+	//inStrategy2 : () -> Bool
+	//nonStrategy2 : ()  -> Bool
+}
+
+theory T: V {
+
+{
+inStrategy1() <- asset_security_type() = bond & asset_rating() = AAA & asset_industry() = banking & ~nonStrategy1().
+nonStrategy1() <- asset_currency() in {EUR, GBP}.	
+}
+inStrategy1().
+
+//{
+//inStrategy2() <- asset_security_type() = bond & asset_rating() in {AAA, AA} & ~nonStrategy2().
+//nonStrategy2() <- asset_country() in {Belgium, France}.
+//}
+//inStrategy2().
+
+
+}
+
+procedure main() {
+  pretty_print(model_expand(T,max=30, timeout_seconds=0))
+}
