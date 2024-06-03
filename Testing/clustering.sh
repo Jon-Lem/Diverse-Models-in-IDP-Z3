@@ -3,7 +3,7 @@
 idp_files=("mapcoloring.idp" "nqueen.idp" "testcase2.idp")
 
 declare -A nk_values=(
-    ["mapcoloring.idp"]="3,117 4,234 6,475"
+    ["mapcoloring.idp"]="3,117 4,234 6,502"
     ["nqueen.idp"]="3,36 4,72 6,180"
     ["testcase2.idp"]="3,29 4,58 6,141"
 )
