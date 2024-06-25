@@ -43,6 +43,24 @@ def checkFunc(lines:list,relevant:list) -> None:
             print(f"Error: function '{relevant[i]}' could not be found")
             exit()
 
+def reformat(lines:list,relevant:list):
+    # print(relevant)
+    # print(lines)
+    target = "structure"
+    begin_struct = indexsearch(lines,target)
+    end_struct = indexEndofBlock(lines,begin_struct)
+    for i in range(len(relevant)):
+        j=begin_struct
+        while j < end_struct:
+            if(relevant[i] in lines[j] and '}' not in lines[j]):
+                k=j
+                while '}' not in lines[k] and k < end_struct:
+                    k+=1
+                    lines[j] = lines[j].replace('\n','') + lines[k]
+                lines=lines[:j+1]+lines[k+1:]
+            j+=1
+    return lines
+
 def checkConstants(lines:list,relevant:list):
     for i in range(len(relevant)):
         target=f"{relevant[i]}"

@@ -33,7 +33,10 @@ class idp(IDP):
         # Delete comments 
         lines = [line for line in lines if '//' not in line]
         checkFunc(lines,relevant)
-        # printCode(lines)
+        printCode(lines)
+        lines = reformat(lines,relevant)
+        printCode(lines)
+        # exit()
         if method == "Base":
             output = runCode(lines)
             print(output)
